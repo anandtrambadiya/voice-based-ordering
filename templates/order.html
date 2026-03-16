@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+{% block title %}New Order — Spice Garden{% endblock %}
+
+{% block head %}
+<style>
+  .order-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    padding: 28px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  /* ── Left panel ── */
+  .left-panel { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Voice section */
+  .voice-section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .voice-section h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .voice-section p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+  .mic-area { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .mic-btn {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--bg3); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 32px; transition: all 0.2s;
+    position: relative;
+  }
+  .mic-btn:hover { border-color: var(--accent); transform: scale(1.05); }
+  .mic-btn.recording {
+    background: rgba(232,102,61,0.15);
+    border-color: var(--accent);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,102,61,0.4); }
+    50%       { box-shadow: 0 0 0 16px rgba(232,102,61,0); }
+  }
+  .mic-status { font-size: 13px; color: var(--muted); }
+  .transcript-box {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; font-size: 14px; min-height: 48px;
+    color: var(--text); font-style: italic;
+  }
+  .transcript-box.has-text { font-style: normal; color: var(--text); }
+
+  /* Parsed items preview */
+  .parsed-preview {
+    display: none; margin-top: 12px; padding: 12px 16px;
+    background: rgba(76,175,130,0.08); border: 1px solid rgba(76,175,130,0.2);
+    border-radius: 8px;
+  }
+  .parsed-preview.show { display: block; }
+  .parsed-preview h4 { font-size: 12px; color: var(--green); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .parsed-item { font-size: 14px; padding: 3px 0; color: var(--text); }
+
+  /* Menu grid */
+  .menu-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .menu-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .menu-section h2 { font-size: 16px; font-weight: 600; }
+  .menu-search { width: 220px; padding: 8px 12px; font-size: 13px; }
+
+  .cat-tabs-sm { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cat-tab-sm {
+    padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: transparent;
+    color: var(--muted); transition: all 0.15s; font-family: var(--font-body);
+  }
+  .cat-tab-sm.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .menu-items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+  .mi-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    cursor: pointer; transition: all 0.18s;
+    position: relative;
+  }
+  .mi-card:hover { border-color: var(--accent); background: rgba(232,102,61,0.05); }
+  .mi-card.in-cart { border-color: var(--green); background: rgba(76,175,130,0.05); }
+  .mi-card.highlighted { border-color: var(--accent2); background: rgba(240,160,69,0.1); animation: highlight 0.5s ease; }
+  @keyframes highlight { 0% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  .mi-name { font-size: 14px; font-weight: 500; line-height: 1.3; margin-bottom: 4px; }
+  .mi-cat  { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .mi-price { font-family: var(--font-head); font-size: 18px; color: var(--accent); }
+  .mi-in-cart-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--green); color: #fff;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: 11px; display: none; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .mi-card.in-cart .mi-in-cart-badge { display: flex; }
+
+  /* ── Right panel: Cart ── */
+  .cart-panel {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0;
+    position: sticky; top: 76px;
+    display: flex; flex-direction: column; max-height: calc(100vh - 100px);
+  }
+  .cart-header {
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .cart-header h2 { font-size: 17px; font-weight: 600; flex: 1; }
+
+  /* Table selector */
+  .table-row { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .table-row label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .table-row select { width: auto; flex: 1; padding: 6px 10px; font-size: 13px; }
+
+  .cart-items { flex: 1; overflow-y: auto; padding: 12px 0; }
+  .cart-empty { text-align: center; padding: 48px 24px; color: var(--muted); }
+  .cart-empty .icon { font-size: 36px; margin-bottom: 8px; }
+
+  /* Cart item row */
+  .cart-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; transition: background 0.15s;
+  }
+  .cart-item:hover { background: rgba(255,255,255,0.02); }
+  .cart-item-name { flex: 1; font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .cart-item-price { font-size: 13px; color: var(--muted); }
+
+  /* Qty controls — Zomato style */
+  .qty-control { display: flex; align-items: center; gap: 0; }
+  .qty-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--accent); background: transparent;
+    color: var(--accent); font-size: 18px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; line-height: 1; font-family: var(--font-body);
+  }
+  .qty-btn:hover { background: var(--accent); color: #fff; }
+  .qty-val { min-width: 28px; text-align: center; font-size: 15px; font-weight: 600; }
+
+  .cart-item-subtotal { font-size: 14px; font-weight: 600; min-width: 60px; text-align: right; }
+
+  /* Totals */
+  .cart-totals {
+    padding: 16px 20px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .total-row { display: flex; justify-content: space-between; font-size: 14px; }
+  .total-row.grand { font-size: 18px; font-weight: 700; font-family: var(--font-head); margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .total-row .label { color: var(--muted); }
+  .total-row.grand .label { color: var(--text); }
+
+  .cart-actions { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+
+  /* Placed state */
+  .placed-overlay {
+    display: none; position: absolute; inset: 0;
+    background: rgba(13,13,13,0.96); border-radius: var(--radius);
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; text-align: center; padding: 32px; z-index: 10;
+  }
+  .placed-overlay.show { display: flex; }
+  .placed-overlay .check { font-size: 56px; }
+  .placed-overlay h3 { font-family: var(--font-head); font-size: 24px; }
+  .placed-overlay p { color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 900px) {
+    .order-layout { grid-template-columns: 1fr; }
+    .cart-panel { position: relative; top: auto; max-height: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-layout">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <!-- Voice -->
+    <div class="voice-section">
+      <h2>🎤 Voice Order</h2>
+      <p>Hold the button and speak your order in English, Hindi or Hinglish</p>
+      <div class="mic-area">
+        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
+        <span class="mic-status" id="mic-status">Tap to speak</span>
+        <div class="transcript-box" id="transcript-box">Your order will appear here…</div>
+        <div class="parsed-preview" id="parsed-preview">
+          <h4>Detected items</h4>
+          <div id="parsed-list"></div>
+          <button class="btn btn-green btn-sm" style="margin-top:10px" onclick="addParsedToCart()">Add to cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu-section">
+      <div class="menu-section-header">
+        <h2>Menu</h2>
+        <input class="menu-search" id="menu-search" placeholder="Search items…" oninput="filterMenu()" />
+      </div>
+      <div class="cat-tabs-sm" id="cat-tabs-sm"></div>
+      <div class="menu-items-grid" id="menu-items-grid"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CART -->
+  <div class="cart-panel" id="cart-panel" style="position:relative">
+    <div class="cart-header">
+      <h2>Cart</h2>
+      <span class="badge badge-orange" id="cart-count">0 items</span>
+    </div>
+    <div class="table-row">
+      <label>Table</label>
+      <select id="table-no">
+        <option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option><option>6</option>
+        <option>7</option><option>8</option><option>9</option><option>10</option>
+      </select>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty"><div class="icon">🛒</div><p>Add items to get started</p></div>
+    </div>
+    <div class="cart-totals" id="cart-totals" style="display:none">
+      <div class="total-row"><span class="label">Subtotal</span><span id="subtotal">₹0</span></div>
+      <div class="total-row"><span class="label">GST (5%)</span><span id="tax">₹0</span></div>
+      <div class="total-row grand"><span class="label">Total</span><span id="total">₹0</span></div>
+    </div>
+    <div class="cart-actions">
+      <button class="btn btn-primary w-full" onclick="placeOrder()" id="place-btn" disabled>Place Order</button>
+      <button class="btn btn-ghost btn-sm w-full" onclick="clearCart()">Clear cart</button>
+    </div>
+
+    <!-- Placed overlay -->
+    <div class="placed-overlay" id="placed-overlay">
+      <div class="check">✅</div>
+      <h3>Order Placed!</h3>
+      <p id="placed-summary"></p>
+      <button class="btn btn-primary" onclick="downloadInvoice()">Download Invoice</button>
+      <button class="btn btn-ghost" onclick="startNewOrder()">New Order</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allMenuItems = [];
+let cart         = {};   // { menu_item_id: { item, qty } }
+let orderId      = null;
+let activeCat    = 'All';
+let mediaRecorder, audioChunks = [];
+let lastParsed   = [];
+
+// ── Boot ──────────────────────────────────────────
+async function init() {
+  const res = await fetch('/api/menu');
+  allMenuItems = await res.json();
+  renderCatTabs();
+  renderMenuGrid();
+}
+
+// ── Menu render ──────────────────────────────────
+function renderCatTabs() {
+  const cats = ['All', ...new Set(allMenuItems.map(i => i.category))];
+  document.getElementById('cat-tabs-sm').innerHTML = cats.map(c => `
+    <button class="cat-tab-sm ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</button>
+  `).join('');
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-tab-sm').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  renderMenuGrid();
+}
+
+function filterMenu() {
+  activeCat = 'All';
+  document.querySelectorAll('.cat-tab-sm').forEach(b => b.classList.toggle('active', b.textContent === 'All'));
+  renderMenuGrid();
+}
+
+function renderMenuGrid() {
+  const q = document.getElementById('menu-search').value.toLowerCase();
+  let items = activeCat === 'All' ? allMenuItems : allMenuItems.filter(i => i.category === activeCat);
+  if (q) items = items.filter(i => i.name.toLowerCase().includes(q));
+
+  document.getElementById('menu-items-grid').innerHTML = items.map(item => {
+    const inCart = cart[item.id];
+    const qty    = inCart ? inCart.qty : 0;
+    return `
+    <div class="mi-card ${inCart ? 'in-cart' : ''}" id="mi-${item.id}" onclick="addToCartFromMenu(${item.id})">
+      <div class="mi-in-cart-badge" id="badge-${item.id}">${qty}</div>
+      <div class="mi-name">${item.name}</div>
+      <div class="mi-cat">${item.category}</div>
+      <div class="mi-price">₹${item.price}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Cart logic ───────────────────────────────────
+function addToCartFromMenu(menuItemId) {
+  const item = allMenuItems.find(i => i.id === menuItemId);
+  if (!item) return;
+  if (cart[menuItemId]) {
+    cart[menuItemId].qty += 1;
+  } else {
+    cart[menuItemId] = { item, qty: 1 };
+  }
+  updateCartUI();
+  const card = document.getElementById(`mi-${menuItemId}`);
+  card.classList.add('highlighted');
+  setTimeout(() => card.classList.remove('highlighted'), 600);
+}
+
+function changeQty(menuItemId, delta) {
+  if (!cart[menuItemId]) return;
+  cart[menuItemId].qty += delta;
+  if (cart[menuItemId].qty <= 0) {
+    delete cart[menuItemId];
+  }
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const items = Object.values(cart);
+  const count = items.reduce((s, c) => s + c.qty, 0);
+
+  document.getElementById('cart-count').textContent = count + ' item' + (count !== 1 ? 's' : '');
+  document.getElementById('place-btn').disabled = items.length === 0;
+
+  if (!items.length) {
+    document.getElementById('cart-items').innerHTML = `<div class="cart-empty"><div class="icon">🛒</div><p>Add items to get started</p></div>`;
+    document.getElementById('cart-totals').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('cart-items').innerHTML = items.map(({ item, qty }) => `
+    <div class="cart-item">
+      <div>
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">₹${item.price} each</div>
+      </div>
+      <div class="qty-control">
+        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+        <span class="qty-val">${qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id}, +1)">+</button>
+      </div>
+      <div class="cart-item-subtotal">₹${(item.price * qty).toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  const subtotal = items.reduce((s, { item, qty }) => s + item.price * qty, 0);
+  const tax      = subtotal * 0.05;
+  const total    = subtotal + tax;
+
+  document.getElementById('subtotal').textContent = '₹' + subtotal.toFixed(2);
+  document.getElementById('tax').textContent      = '₹' + tax.toFixed(2);
+  document.getElementById('total').textContent    = '₹' + total.toFixed(2);
+  document.getElementById('cart-totals').style.display = 'flex';
+
+  // Refresh menu badges
+  allMenuItems.forEach(item => {
+    const card  = document.getElementById(`mi-${item.id}`);
+    const badge = document.getElementById(`badge-${item.id}`);
+    if (!card) return;
+    if (cart[item.id]) {
+      card.classList.add('in-cart');
+      badge.textContent = cart[item.id].qty;
+    } else {
+      card.classList.remove('in-cart');
+      badge.textContent = '';
+    }
+  });
+}
+
+function clearCart() {
+  cart = {};
+  updateCartUI();
+}
+
+// ── Place order ──────────────────────────────────
+async function placeOrder() {
+  const table = document.getElementById('table-no').value;
+
+  // 1. Create order
+  const createRes = await fetch('/api/orders', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ table_no: table })
+  });
+  const order = await createRes.json();
+  orderId = order.id;
+
+  // 2. Add items one-by-one
+  for (const { item, qty } of Object.values(cart)) {
+    await fetch(`/api/orders/${orderId}/items`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ menu_item_id: item.id, quantity: qty })
+    });
+  }
+
+  // 3. Place
+  const finalRes = await fetch(`/api/orders/${orderId}/place`, { method: 'POST' });
+  const final    = await finalRes.json();
+
+  document.getElementById('placed-summary').textContent =
+    `Order #${String(orderId).padStart(4,'0')} · Table ${table} · ₹${final.total.toFixed(2)}`;
+  document.getElementById('placed-overlay').classList.add('show');
+}
+
+function downloadInvoice() {
+  window.open(`/api/orders/${orderId}/invoice`, '_blank');
+}
+
+function startNewOrder() {
+  cart = {};
+  orderId = null;
+  document.getElementById('placed-overlay').classList.remove('show');
+  updateCartUI();
+}
+
+// ── Voice ─────────────────────────────────────────
+let isRecording = false;
+
+async function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks  = [];
+
+    // Pick a format Whisper can read without ffmpeg on Windows
+    const mimeType = MediaRecorder.isTypeSupported('audio/wav')
+      ? 'audio/wav'
+      : MediaRecorder.isTypeSupported('audio/webm;codecs=pcm')
+      ? 'audio/webm;codecs=pcm'
+      : 'audio/webm';
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = processAudio;
+    mediaRecorder.start(100); // collect in 100ms chunks
+    isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('mic-btn').textContent = '⏹';
+    document.getElementById('mic-status').textContent = 'Recording… tap to stop';
+  } catch(e) {
+    showToast('Microphone access denied', 'error');
+  }
+}
+
+function stopRecording() {
+  mediaRecorder.stop();
+  mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  isRecording = false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('mic-btn').textContent = '🎤';
+  document.getElementById('mic-status').textContent = 'Processing…';
+}
+
+async function processAudio() {
+  const mimeType = mediaRecorder.mimeType || 'audio/webm';
+  const ext      = mimeType.includes('wav') ? 'wav' : 'webm';
+  const blob     = new Blob(audioChunks, { type: mimeType });
+
+  console.log(`[Voice] Sending ${blob.size} bytes as ${ext}`);
+
+  const formData = new FormData();
+  formData.append('audio', blob, `order.${ext}`);
+
+  try {
+    const res  = await fetch('/api/voice/transcribe', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      showToast(data.error || 'Voice error', 'error');
+      document.getElementById('mic-status').textContent = 'Error — try again';
+      return;
+    }
+
+    const tBox = document.getElementById('transcript-box');
+    tBox.textContent = data.transcript || '(Could not transcribe)';
+    tBox.classList.add('has-text');
+    document.getElementById('mic-status').textContent = 'Done! Tap to speak again';
+
+    lastParsed = data.items || [];
+    if (lastParsed.length) {
+      document.getElementById('parsed-list').innerHTML = lastParsed.map(i =>
+        `<div class="parsed-item">• ${i.name} × ${i.quantity} — ₹${(i.price * i.quantity).toFixed(2)}</div>`
+      ).join('');
+      document.getElementById('parsed-preview').classList.add('show');
+    } else {
+      document.getElementById('parsed-preview').classList.remove('show');
+      showToast('Heard: "' + data.transcript + '" — but no menu items matched', 'error');
+    }
+  } catch(e) {
+    document.getElementById('mic-status').textContent = 'Network error — try again';
+    showToast('Could not reach server', 'error');
+  }
+}
+
+function addParsedToCart() {
+  lastParsed.forEach(p => {
+    if (cart[p.menu_item_id]) {
+      cart[p.menu_item_id].qty += p.quantity;
+    } else {
+      const menuItem = allMenuItems.find(i => i.id === p.menu_item_id);
+      if (menuItem) cart[p.menu_item_id] = { item: menuItem, qty: p.quantity };
+    }
+  });
+  document.getElementById('parsed-preview').classList.remove('show');
+  updateCartUI();
+  showToast(`${lastParsed.length} item(s) added to cart`, 'success');
+  lastParsed = [];
+}
+
+init();
+</script>
+{% endblock %}

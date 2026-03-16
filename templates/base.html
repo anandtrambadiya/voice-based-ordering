@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Spice Garden{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0d;
+      --bg2:       #161616;
+      --bg3:       #1e1e1e;
+      --border:    #2a2a2a;
+      --text:      #f0ece4;
+      --muted:     #7a7570;
+      --accent:    #e8663d;
+      --accent2:   #f0a045;
+      --green:     #4caf82;
+      --red:       #e05252;
+      --card:      #191919;
+      --font-head: 'Playfair Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 28px; height: 60px; gap: 32px;
+    }
+    .nav-brand {
+      font-family: var(--font-head); font-size: 20px; color: var(--accent);
+      text-decoration: none; letter-spacing: 0.5px; flex-shrink: 0;
+    }
+    .nav-brand span { color: var(--accent2); }
+    .nav-links { display: flex; gap: 4px; flex: 1; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted); padding: 6px 14px;
+      border-radius: 8px; font-size: 14px; font-weight: 500;
+      transition: color 0.2s, background 0.2s; white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--bg3); }
+    .nav-links a.active { color: var(--text); background: var(--bg3); }
+
+    /* ── Page wrapper ── */
+    .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 8px; font-family: var(--font-body);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      border: none; transition: all 0.18s; text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #d45a32; transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: #444; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #3d9e6e; transform: translateY(-1px); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { background: #c74444; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+
+    /* ── Inputs ── */
+    input, select {
+      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 10px 14px; font-family: var(--font-body);
+      font-size: 14px; transition: border-color 0.2s; outline: none; width: 100%;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--muted); }
+    label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 500;
+    }
+    .badge-orange { background: rgba(232,102,61,0.15); color: var(--accent); }
+    .badge-green  { background: rgba(76,175,130,0.15); color: var(--green); }
+    .badge-gray   { background: var(--bg3); color: var(--muted); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 20px; font-size: 14px;
+      box-shadow: var(--shadow); transform: translateY(80px);
+      opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 320px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-left: 3px solid var(--green); }
+    #toast.error   { border-left: 3px solid var(--red); }
+
+    /* ── Utility ── */
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-6 { margin-top: 24px; }
+    .text-muted { color: var(--muted); }
+    .text-accent { color: var(--accent); }
+    .text-green { color: var(--green); }
+    .text-sm { font-size: 13px; }
+    .font-bold { font-weight: 600; }
+    .w-full { width: 100%; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/">Spice <span>Garden</span></a>
+  <div class="nav-links">
+    <a href="/"       id="nav-dash">Dashboard</a>
+    <a href="/menu"   id="nav-menu">Menu</a>
+    <a href="/order/new" id="nav-order">New Order</a>
+    <a href="/orders" id="nav-orders">Orders</a>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+{% block content %}{% endblock %}
+
+<script>
+  // Highlight active nav link
+  const path = location.pathname;
+  if (path === '/')           document.getElementById('nav-dash').classList.add('active');
+  if (path === '/menu')       document.getElementById('nav-menu').classList.add('active');
+  if (path.startsWith('/order/new')) document.getElementById('nav-order').classList.add('active');
+  if (path === '/orders')     document.getElementById('nav-orders').classList.add('active');
+
+  // Toast helper
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.className = '', 3000);
+  }
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

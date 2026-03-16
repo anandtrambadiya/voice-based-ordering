@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Menu — Spice Garden{% endblock %}
+
+{% block head %}
+<style>
+  .page-header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .page-header h1 { font-family: var(--font-head); font-size: 32px; font-weight: 700; }
+  .page-header p { color: var(--muted); margin-top: 6px; }
+
+  /* Add form */
+  .add-form {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 28px;
+  }
+  .add-form h2 { font-size: 16px; font-weight: 600; margin-bottom: 18px; }
+  .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end; }
+
+  /* Category filter tabs */
+  .cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .cat-tab {
+    padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: transparent;
+    color: var(--muted); transition: all 0.18s; font-family: var(--font-body);
+  }
+  .cat-tab:hover { color: var(--text); border-color: #444; }
+  .cat-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Menu grid */
+  .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .menu-item-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .menu-item-card:hover { border-color: #333; }
+  .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .item-name { font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .item-price { font-family: var(--font-head); font-size: 20px; color: var(--accent); white-space: nowrap; }
+  .item-category { font-size: 12px; color: var(--muted); }
+  .item-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+  /* Edit inline */
+  .edit-form { display: none; flex-direction: column; gap: 10px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .edit-form.open { display: flex; }
+  .edit-row { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+
+  @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  .empty-state { text-align: center; padding: 64px 24px; color: var(--muted); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <div class="page-header">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1>Menu</h1>
+        <p>Manage your restaurant's menu items and prices</p>
+      </div>
+      <div id="item-count" class="text-muted text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Add new item -->
+  <div class="add-form">
+    <h2>+ Add New Item</h2>
+    <div class="form-row">
+      <div>
+        <label>Item name</label>
+        <input id="new-name" type="text" placeholder="e.g. Chicken Tikka Masala" />
+      </div>
+      <div>
+        <label>Price (₹)</label>
+        <input id="new-price" type="number" min="0" placeholder="0.00" />
+      </div>
+      <div>
+        <label>Category</label>
+        <select id="new-cat">
+          <option>Starters</option>
+          <option>Main Course</option>
+          <option>Breads</option>
+          <option>Rice</option>
+          <option>Drinks</option>
+          <option>Desserts</option>
+          <option>General</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="addItem()">Add</button>
+    </div>
+  </div>
+
+  <!-- Category filter -->
+  <div class="cat-tabs" id="cat-tabs"></div>
+
+  <!-- Menu grid -->
+  <div class="menu-grid" id="menu-grid">
+    <div class="empty-state"><div class="icon">🍽️</div><p>Loading menu…</p></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allItems = [];
+let activeCategory = 'All';
+
+async function loadMenu() {
+  const res = await fetch('/api/menu');
+  allItems = await res.json();
+  renderCategoryTabs();
+  renderGrid();
+  document.getElementById('item-count').textContent = allItems.length + ' items';
+}
+
+function renderCategoryTabs() {
+  const cats = ['All', ...new Set(allItems.map(i => i.category))];
+  document.getElementById('cat-tabs').innerHTML = cats.map(c => `
+    <button class="cat-tab ${c === activeCategory ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>
+  `).join('');
+}
+
+function filterCat(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  renderGrid();
+}
+
+function renderGrid() {
+  const filtered = activeCategory === 'All' ? allItems : allItems.filter(i => i.category === activeCategory);
+  const grid = document.getElementById('menu-grid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🍽️</div><p>No items in this category</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map((item, idx) => `
+    <div class="menu-item-card" id="card-${item.id}" style="animation-delay:${idx*0.04}s">
+      <div class="item-header">
+        <div>
+          <div class="item-name">${item.name}</div>
+          <div class="item-category">${item.category}</div>
+        </div>
+        <div class="item-price">₹${item.price}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleEdit(${item.id})">Edit</button>
+        <button class="btn btn-sm" style="background:rgba(224,82,82,0.1);color:var(--red);border:1px solid rgba(224,82,82,0.2)" onclick="deleteItem(${item.id})">Delete</button>
+      </div>
+      <div class="edit-form" id="edit-${item.id}">
+        <div class="edit-row">
+          <div><label>Name</label><input id="ename-${item.id}" value="${item.name}"/></div>
+          <div><label>Price</label><input id="eprice-${item.id}" type="number" value="${item.price}"/></div>
+        </div>
+        <div><label>Category</label>
+          <select id="ecat-${item.id}">
+            ${['Starters','Main Course','Breads','Rice','Drinks','Desserts','General'].map(c =>
+              `<option ${c === item.category ? 'selected' : ''}>${c}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-primary btn-sm" onclick="saveEdit(${item.id})">Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleEdit(${item.id})">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleEdit(id) {
+  document.getElementById(`edit-${id}`).classList.toggle('open');
+}
+
+async function addItem() {
+  const name  = document.getElementById('new-name').value.trim();
+  const price = document.getElementById('new-price').value;
+  const cat   = document.getElementById('new-cat').value;
+  if (!name || !price) { showToast('Name and price required', 'error'); return; }
+
+  const res = await fetch('/api/menu', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, price: parseFloat(price), category: cat })
+  });
+  if (res.ok) {
+    document.getElementById('new-name').value  = '';
+    document.getElementById('new-price').value = '';
+    showToast('Item added!', 'success');
+    loadMenu();
+  }
+}
+
+async function saveEdit(id) {
+  const name  = document.getElementById(`ename-${id}`).value.trim();
+  const price = document.getElementById(`eprice-${id}`).value;
+  const cat   = document.getElementById(`ecat-${id}`).value;
+
+  const res = await fetch(`/api/menu/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, price: parseFloat(price), category: cat })
+  });
+  if (res.ok) { showToast('Saved!', 'success'); loadMenu(); }
+}
+
+async function deleteItem(id) {
+  if (!confirm('Remove this item from the menu?')) return;
+  await fetch(`/api/menu/${id}`, { method: 'DELETE' });
+  showToast('Item removed', 'success');
+  loadMenu();
+}
+
+loadMenu();
+</script>
+{% endblock %}
