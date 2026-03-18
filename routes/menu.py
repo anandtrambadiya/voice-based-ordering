@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify, render_template, session
 from models import db, MenuItem
-from utils.auth import login_required, owner_required
+from utils.auth import login_required, owner_required, staff_required
 
 menu_bp = Blueprint('menu', __name__)
 
 
 @menu_bp.route('/')
-@login_required
+@owner_required
 def dashboard():
     return render_template('dashboard.html')
 
@@ -23,6 +23,18 @@ def get_menu():
     rid   = session['restaurant_id']
     items = MenuItem.query.filter_by(restaurant_id=rid, available=True).order_by(MenuItem.category).all()
     return jsonify([i.to_dict() for i in items])
+
+
+@menu_bp.route('/api/menu/categories', methods=['GET'])
+@login_required
+def get_categories():
+    """Return all unique categories for this restaurant."""
+    rid  = session['restaurant_id']
+    rows = db.session.query(MenuItem.category).filter_by(
+        restaurant_id=rid, available=True
+    ).distinct().order_by(MenuItem.category).all()
+    cats = [r[0] for r in rows if r[0]]
+    return jsonify(cats)
 
 
 @menu_bp.route('/api/menu', methods=['POST'])

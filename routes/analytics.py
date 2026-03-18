@@ -25,7 +25,7 @@ def summary():
     def revenue_since(since):
         orders = Order.query.filter(
             Order.restaurant_id == rid,
-            Order.status == 'placed',
+            Order.status.in_(['placed','preparing','served']),
             Order.created_at >= since
         ).all()
         return round(sum(o.total for o in orders), 2), len(orders)
@@ -35,7 +35,7 @@ def summary():
     rev_month, cnt_month   = revenue_since(month)
 
     # Average order value (all time)
-    all_orders = Order.query.filter_by(restaurant_id=rid, status='placed').all()
+    all_orders = Order.query.filter(Order.restaurant_id==rid, Order.status.in_(['placed','preparing','served'])).all()
     avg_order  = round(sum(o.total for o in all_orders) / len(all_orders), 2) if all_orders else 0
 
     # Busiest hours — count orders per hour of day

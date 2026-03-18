@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, session
 from models import db, Order, OrderItem, MenuItem
-from utils.auth import login_required, owner_required
+from utils.auth import login_required, owner_required, staff_required
 
 orders_bp = Blueprint('orders', __name__)
 
@@ -17,12 +17,22 @@ def orders_list_page():
     return render_template('orders.html')
 
 
+@orders_bp.route('/kitchen')
+@login_required
+def kitchen_page():
+    return render_template('kitchen.html')
+
+
 @orders_bp.route('/api/orders', methods=['POST'])
 @login_required
 def create_order():
-    rid      = session['restaurant_id']
-    data     = request.get_json() or {}
-    order    = Order(restaurant_id=rid, table_no=data.get('table_no', '1'))
+    rid  = session['restaurant_id']
+    data = request.get_json() or {}
+    order = Order(
+        restaurant_id   = rid,
+        table_no        = data.get('table_no', '1'),
+        status          = 'placed'                               # skip pending
+    )
     db.session.add(order)
     db.session.commit()
     return jsonify(order.to_dict()), 201
@@ -84,6 +94,21 @@ def list_orders():
     orders = Order.query.filter_by(restaurant_id=rid).order_by(Order.created_at.desc()).limit(50).all()
     return jsonify([o.to_dict() for o in orders])
 
+
+
+@orders_bp.route('/api/orders/<int:order_id>/status', methods=['POST'])
+@login_required
+def update_status(order_id):
+    rid   = session['restaurant_id']
+    order = Order.query.filter_by(id=order_id, restaurant_id=rid).first_or_404()
+    data  = request.get_json() or {}
+    new_status = data.get('status')
+    allowed = ['placed', 'preparing', 'served']
+    if new_status not in allowed:
+        return jsonify({'error': 'Invalid status'}), 400
+    order.status = new_status
+    db.session.commit()
+    return jsonify(order.to_dict())
 
 def _recalculate(order):
     TAX_RATE       = 0.05

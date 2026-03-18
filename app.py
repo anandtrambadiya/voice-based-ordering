@@ -21,6 +21,7 @@ def create_app():
     from routes.onboard   import onboard_bp
     from routes.analytics import analytics_bp
     from routes.customer  import customer_bp
+    from routes.staff     import staff_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu_bp)
@@ -29,6 +30,7 @@ def create_app():
     app.register_blueprint(voice_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(customer_bp)
+    app.register_blueprint(staff_bp)
     app.register_blueprint(onboard_bp)
 
     # Load current user into g on every request
@@ -38,10 +40,14 @@ def create_app():
     # Inject g.restaurant into all templates automatically
     @app.context_processor
     def inject_globals():
+        DINE_IN = ['restaurant', 'cafe']
+        btype   = g.restaurant.business_type if g.restaurant else 'restaurant'
         return {
             'current_restaurant': g.restaurant,
             'current_user':       g.user,
             'current_role':       g.user.role if g.user else None,
+            'biz_mode':           'dine_in' if btype in DINE_IN else 'direct',
+            'biz_labels':         g.restaurant.labels if g.restaurant else {},
         }
 
     with app.app_context():
@@ -52,4 +58,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, port=5000)

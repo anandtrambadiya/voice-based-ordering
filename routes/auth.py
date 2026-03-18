@@ -1,3 +1,4 @@
+import hashlib
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
 from models import db, Restaurant, User, generate_password
 
@@ -17,8 +18,10 @@ def login():
     email = data.get('email', '').strip().lower()
     pwd   = data.get('password', '').strip()
 
+    import hashlib
+    pwd_hash = hashlib.sha256(pwd.encode()).hexdigest()
     user = User.query.filter_by(email=email).first()
-    if not user or user.password != pwd:
+    if not user or (user.password != pwd and user.password != pwd_hash):
         return jsonify({'error': 'Invalid email or password'}), 401
 
     restaurant = Restaurant.query.get(user.restaurant_id)
@@ -36,7 +39,7 @@ def login():
         'role':      user.role,
         'biz_name':  restaurant.name,
         'biz_type':  restaurant.business_type,
-        'redirect':  '/'
+        'redirect': '/' if user.role == 'owner' else '/order/new'
     })
 
 
@@ -80,7 +83,7 @@ def register():
 
     owner = User(
         restaurant_id=restaurant.id,
-        name=name, email=email, password=pwd, role='owner'
+        name=name, email=email, password=hashlib.sha256(pwd.encode()).hexdigest(), role='owner'
     )
     db.session.add(owner)
     db.session.commit()

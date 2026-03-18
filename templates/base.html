@@ -37,12 +37,13 @@
     .logo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(14,165,160,.5); animation: blink 2s ease-in-out infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
     .nav-sep { width: 1px; height: 18px; background: var(--bdr); }
-    .nav-biz { font-size: .8rem; font-weight: 700; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .nav-biz { font-size: .95rem; font-weight: 800; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
     .nav-links { display: flex; gap: 4px; }
     .nav-links a { text-decoration: none; color: var(--txt3); padding: .32rem .85rem; border-radius: 8px; font-size: .78rem; font-weight: 600; transition: all .2s; white-space: nowrap; }
     .nav-links a:hover { color: var(--teal); background: var(--teal-lt); }
     .nav-links a.active { color: var(--teal); background: var(--teal-lt); border: 1.5px solid var(--teal-bd); }
     .nav-links a.owner-only { display: {% if current_role == 'owner' %}inline-flex{% else %}none{% endif %}; }
+
     .nav-right { display: flex; align-items: center; gap: .7rem; }
     .role-chip { padding: .2rem .7rem; border-radius: 50px; font-size: .68rem; font-weight: 700; font-family: var(--fm);
       background: {% if current_role == 'owner' %}var(--teal-lt){% else %}var(--green-bg){% endif %};
@@ -105,11 +106,17 @@
     {% endif %}
     <div class="nav-links">
       <a href="/" id="nav-dash" class="owner-only">Dashboard</a>
-      <a href="/menu" id="nav-menu" class="owner-only">Menu</a>
+      <a href="/menu" id="nav-menu" class="owner-only">{{ biz_labels.get('item', 'Menu') }}s</a>
       <a href="/order/new" id="nav-order">New Order</a>
-      <a href="/orders" id="nav-orders">Orders</a>
+      <a href="/orders" id="nav-orders">{{ biz_labels.get('order', 'Orders') }}s</a>
       <a href="/analytics" id="nav-analytics" class="owner-only">Analytics</a>
+      {% if biz_mode == 'dine_in' %}
       <a href="/tables" id="nav-tables" class="owner-only">QR Tables</a>
+      <a href="/kitchen" id="nav-kitchen">Kitchen</a>
+      {% else %}
+      <a href="/tables" id="nav-tables" class="owner-only">QR Code</a>
+      {% endif %}
+      <a href="/staff" id="nav-staff" class="owner-only">Staff</a>
     </div>
   </div>
   <div class="nav-right">
@@ -131,6 +138,8 @@
   if (path === '/orders')            document.getElementById('nav-orders')?.classList.add('active');
   if (path === '/analytics')         document.getElementById('nav-analytics')?.classList.add('active');
   if (path === '/tables')            document.getElementById('nav-tables')?.classList.add('active');
+  if (path === '/staff')             document.getElementById('nav-staff')?.classList.add('active');
+  if (path === '/kitchen')           document.getElementById('nav-kitchen')?.classList.add('active');
 
   let _tt;
   function showToast(msg, type='info') {

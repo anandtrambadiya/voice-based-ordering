@@ -4,7 +4,6 @@ from models import Restaurant, User
 
 
 def load_user():
-    """Call at start of every request — populates g.restaurant and g.user."""
     g.restaurant = None
     g.user       = None
     rid = session.get('restaurant_id')
@@ -14,27 +13,49 @@ def load_user():
         g.user       = User.query.get(uid)
 
 
+def _is_api():
+    return request.path.startswith('/api/')
+
+def _redirect_or_401():
+    if _is_api():
+        return jsonify({'error': 'Not logged in'}), 401
+    return redirect(url_for('auth.login_page'))
+
+def _forbidden_or_403(msg='Access denied'):
+    if _is_api():
+        return jsonify({'error': msg}), 403
+    return redirect(url_for('orders.new_order_page'))
+
+
 def login_required(f):
+    """Any logged-in user (owner or staff)."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get('user_id'):
-            if request.path.startswith('/api/'):
-                return jsonify({'error': 'Not logged in'}), 401
-            return redirect(url_for('auth.login_page'))
+            return _redirect_or_401()
         return f(*args, **kwargs)
     return decorated
 
 
 def owner_required(f):
+    """Owner only."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get('user_id'):
-            if request.path.startswith('/api/'):
-                return jsonify({'error': 'Not logged in'}), 401
-            return redirect(url_for('auth.login_page'))
+            return _redirect_or_401()
         if session.get('role') != 'owner':
-            if request.path.startswith('/api/'):
-                return jsonify({'error': 'Owner access required'}), 403
-            return redirect(url_for('orders.new_order_page'))
+            return _forbidden_or_403('Owner access required')
+        return f(*args, **kwargs)
+    return decorated
+
+
+def staff_required(f):
+    """Staff or owner (anyone logged in with a valid role)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('user_id'):
+            return _redirect_or_401()
+        if session.get('role') not in ('owner', 'staff'):
+            return _forbidden_or_403('Staff access required')
         return f(*args, **kwargs)
     return decorated

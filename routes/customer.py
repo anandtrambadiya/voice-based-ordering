@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, abort, session, g
+from flask import Blueprint, render_template, request, jsonify, abort, session, g, redirect
 from models import db, Restaurant, MenuItem, Order, OrderItem
 import hashlib
 
@@ -75,7 +75,9 @@ def qr_url():
 
 @customer_bp.route('/tables')
 def tables_page():
-    if not session.get('restaurant_id'):
-        from flask import redirect
+    from utils.auth import owner_required
+    if not session.get('user_id'):
         return redirect('/login')
+    if session.get('role') != 'owner':
+        return redirect('/order/new')
     return render_template('tables.html')

@@ -47,7 +47,7 @@
   <div class="stats-grid">
     <div class="stat-card" style="--accent-col:var(--teal)">
       <div class="stat-val" id="stat-orders">—</div>
-      <div class="stat-lbl">Orders today</div>
+      <div class="stat-lbl">{{ biz_labels.get('order','Order') }}s today</div>
     </div>
     <div class="stat-card" style="--accent-col:var(--green)">
       <div class="stat-val" id="stat-revenue">—</div>
@@ -55,7 +55,7 @@
     </div>
     <div class="stat-card" style="--accent-col:#f59e0b">
       <div class="stat-val" id="stat-items">—</div>
-      <div class="stat-lbl">Menu items</div>
+      <div class="stat-lbl">{{ biz_labels.get('item','Menu') }} items</div>
     </div>
     <div class="stat-card" style="--accent-col:#8b5cf6">
       <div class="stat-val" id="stat-pending">—</div>
@@ -67,13 +67,13 @@
     <a href="/order/new" class="quick-card">
       <div class="qicon">🎤</div>
       <h3>New Voice Order</h3>
-      <p>Speak items in English, Hindi or Hinglish.</p>
+      <p>Speak {{ biz_labels.get('item','item') }}s by voice.</p>
       <div class="arrow">→</div>
     </a>
     <a href="/menu" class="quick-card">
       <div class="qicon">📋</div>
-      <h3>Manage Menu</h3>
-      <p>Add, edit or remove items and prices.</p>
+      <h3>Manage {{ biz_labels.get('item','Menu') }}s</h3>
+      <p>Add, edit or remove {{ biz_labels.get('item','item') }}s and prices.</p>
       <div class="arrow">→</div>
     </a>
     <a href="/orders" class="quick-card">

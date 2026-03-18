@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Kitchen — {{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}
+
+{% block head %}
+<style>
+.k-wrap { padding: 1.2rem 1.4rem; max-width: 1200px; margin: 0 auto; }
+.k-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem; }
+.k-header h1 { font-family: var(--fh); font-size: 1.5rem; font-weight: 900; color: var(--txt); }
+.k-live { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--green); }
+.k-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: blink 1.4s ease-in-out infinite; }
+
+.k-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.k-col-hd { font-family: var(--fh); font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .8rem; display: flex; align-items: center; gap: 8px; }
+.k-col-hd::after { content: ''; flex: 1; height: 1.5px; background: var(--bdr); }
+.k-col-hd.preparing { color: var(--amber); }
+.k-col-hd.placed    { color: var(--teal); }
+
+.k-card { background: var(--white); border: 1.5px solid var(--bdr); border-radius: 14px; padding: 1rem 1.1rem; margin-bottom: 10px; transition: border-color .2s, box-shadow .2s; }
+.k-card.new-flash { animation: flash 0.6s ease 3; }
+@keyframes flash { 0%,100%{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt)} 50%{border-color:var(--bdr);box-shadow:none} }
+.k-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .6rem; }
+.k-ord { font-family: var(--fm); font-size: .82rem; font-weight: 700; color: var(--teal); }
+.k-table { font-size: .78rem; font-weight: 700; color: var(--txt2); background: var(--s1); border: 1px solid var(--bdr); border-radius: 6px; padding: .15rem .55rem; }
+.k-time { font-size: .7rem; color: var(--txt4); font-family: var(--fm); }
+.k-items { display: flex; flex-direction: column; gap: 3px; margin-bottom: .8rem; }
+.k-item { display: flex; justify-content: space-between; font-size: .8rem; color: var(--txt); }
+.k-item .qty { font-family: var(--fm); font-weight: 700; color: var(--teal); }
+.k-btn { width: 100%; padding: .6rem; border-radius: 9px; border: none; font-family: var(--fh); font-weight: 700; font-size: .8rem; cursor: pointer; transition: all .2s; }
+.k-btn.start  { background: linear-gradient(135deg, var(--amber), #f59e0b); color: #fff; box-shadow: 0 3px 10px rgba(217,119,6,.25); }
+.k-btn.start:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(217,119,6,.3); }
+.k-btn.serve  { background: linear-gradient(135deg, var(--green), #15803d); color: #fff; box-shadow: 0 3px 10px rgba(22,163,74,.25); }
+.k-btn.serve:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(22,163,74,.3); }
+
+.k-empty { text-align: center; padding: 2.5rem 1rem; color: var(--txt4); font-size: .82rem; }
+.k-empty div { font-size: 2rem; margin-bottom: .4rem; opacity: .3; }
+
+@media(max-width:700px) { .k-cols { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if biz_mode != 'dine_in' %}
+<div style="text-align:center;padding:4rem 1rem;color:var(--txt3);">
+  <div style="font-size:2.5rem;margin-bottom:1rem">🏪</div>
+  <div style="font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--txt)">Kitchen view not available</div>
+  <div style="font-size:.84rem;margin-top:.5rem">This feature is for restaurants and cafes only.</div>
+</div>
+{% else %}
+<div class="k-wrap">
+  <div class="k-header">
+    <h1>👨‍🍳 Kitchen View</h1>
+    <div class="k-live"><div class="k-live-dot"></div> Live — refreshes every 8s</div>
+  </div>
+
+  <div class="k-cols">
+    <div>
+      <div class="k-col-hd placed">🆕 New Orders (Placed)</div>
+      <div id="placed-list"></div>
+    </div>
+    <div>
+      <div class="k-col-hd preparing">🔥 Preparing</div>
+      <div id="preparing-list"></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+let knownIds = new Set();
+const synth = window.speechSynthesis;
+
+function speak(text) {
+  if (!synth) return;
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-IN'; u.rate = 0.95; u.pitch = 1.1; u.volume = 1;
+  synth.speak(u);
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 60000);
+  if (diff < 1) return 'just now';
+  if (diff === 1) return '1 min ago';
+  return diff + ' mins ago';
+}
+
+function renderCard(o, action) {
+  return `<div class="k-card" id="kc-${o.id}">
+    <div class="k-card-top">
+      <span class="k-ord">#ORD-${String(o.id).padStart(4,'0')}</span>
+      <span class="k-table">Table ${o.table_no}</span>
+      <span class="k-time">${timeAgo(o.created_at)}</span>
+    </div>
+    <div class="k-items">
+      ${o.items.map(i => `<div class="k-item"><span>${i.name}</span><span class="qty">×${i.quantity}</span></div>`).join('')}
+    </div>
+    ${action === 'start' ?
+      `<button class="k-btn start" onclick="updateStatus(${o.id},'preparing')">🔥 Start Preparing</button>` :
+      `<button class="k-btn serve"  onclick="updateStatus(${o.id},'served')">✅ Mark Served</button>`
+    }
+  </div>`;
+}
+
+async function loadOrders() {
+  const res    = await fetch('/api/orders');
+  const orders = await res.json();
+
+  const placed    = orders.filter(o => o.status === 'placed');
+  const preparing = orders.filter(o => o.status === 'preparing');
+
+  // Detect new orders and announce
+  placed.forEach(o => {
+    if (!knownIds.has(o.id)) {
+      if (knownIds.size > 0) {
+        // New order arrived after initial load
+        speak(`New order at Table ${o.table_no}`);
+        const el = document.getElementById(`kc-${o.id}`);
+        if (el) el.classList.add('new-flash');
+      }
+      knownIds.add(o.id);
+    }
+  });
+
+  const pEl = document.getElementById('placed-list');
+  const rEl = document.getElementById('preparing-list');
+
+  pEl.innerHTML = placed.length
+    ? placed.map(o => renderCard(o, 'start')).join('')
+    : `<div class="k-empty"><div>🍽️</div>No new orders</div>`;
+
+  rEl.innerHTML = preparing.length
+    ? preparing.map(o => renderCard(o, 'serve')).join('')
+    : `<div class="k-empty"><div>🔥</div>Nothing preparing</div>`;
+}
+
+async function updateStatus(id, status) {
+  const res = await fetch(`/api/orders/${id}/status`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ status })
+  });
+  if (res.ok) {
+    if (status === 'served') speak('Order served. Table cleared.');
+    loadOrders();
+  }
+}
+
+// Initial load + poll every 8s
+loadOrders();
+setInterval(loadOrders, 8000);
+</script>
+{% endblock %}

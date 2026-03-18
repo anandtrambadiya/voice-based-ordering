@@ -26,13 +26,23 @@
 {% block content %}
 <div class="page">
   <div class="page-header">
+    {% if biz_mode == 'dine_in' %}
     <h1>Tables &amp; QR Codes</h1>
     <p>Each table gets a unique QR code. Customers scan → see menu → place order directly.</p>
+    {% else %}
+    <h1>Shop QR Code</h1>
+    <p>One QR code for your shop. Customers scan → browse items → place order directly.</p>
+    {% endif %}
   </div>
 
   <div class="info-box">
+    {% if biz_mode == 'dine_in' %}
     <b>How it works:</b> Print each QR code and place it on the respective table.
-    Customer scans with their phone → opens your menu → orders without any login.
+    Customer scans → opens your menu → orders without any login.
+    {% else %}
+    <b>How it works:</b> Print and display this QR code at your counter or entrance.
+    Customer scans → browses your items → places order without any login.
+    {% endif %}
     Orders appear instantly in your <a href="/orders" style="color:var(--teal);font-weight:600">Orders page</a>.
   </div>
 
@@ -44,12 +54,15 @@
 
 {% block scripts %}
 <script>
+const BIZ_MODE = '{{ biz_mode }}';
+
 async function loadTables() {
   const grid = document.getElementById('tablesGrid');
   grid.innerHTML = '';
 
-  // Generate QR for tables 1–10
-  for (let t = 1; t <= 10; t++) {
+  const tables = BIZ_MODE === 'dine_in' ? Array.from({length:10},(_,i)=>i+1) : [0];
+
+  for (let t of tables) {
     const res  = await fetch(`/api/customer/qr-url?table=${t}`);
     const data = await res.json();
     const url  = data.url;
@@ -84,10 +97,10 @@ function printQR(tableNo) {
   const card = document.querySelectorAll('.tcard')[tableNo - 1];
   const win  = window.open('', '_blank');
   win.document.write(`
-    <html><head><title>Table ${tableNo} QR</title>
+    <html><head><title>${BIZ_MODE === 'dine_in' ? 'Table ' + tableNo : 'Shop QR'}</title>
     <style>body{font-family:sans-serif;text-align:center;padding:2rem;}h2{margin-bottom:1rem;}p{color:#666;font-size:.85rem;margin-top:.8rem;}</style>
     </head><body>
-    <h2>{{ current_restaurant.name if current_restaurant else 'Restaurant' }} — Table ${tableNo}</h2>
+    <h2>{{ current_restaurant.name if current_restaurant else 'Restaurant' }}${BIZ_MODE === 'dine_in' ? ' — Table ' + tableNo : ''}</h2>
     ${card.querySelector('.qr-box').innerHTML}
     <p>Scan to view menu &amp; place order</p>
     </body></html>`);

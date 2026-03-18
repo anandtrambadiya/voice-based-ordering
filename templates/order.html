@@ -7,6 +7,10 @@
 <style>
 nav { display: none !important; }
 .app-wrap { height: 100vh !important; }
+.cust-header{background:#fff;border-bottom:1.5px solid var(--bdr);padding:.6rem 1.2rem;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.cust-logo{width:28px;height:28px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.cust-biz{font-family:var(--fh);font-size:.9rem;font-weight:800;color:var(--txt);}
+.cust-tag{font-size:.72rem;color:var(--txt3);font-weight:500;margin-left:2px;}
 </style>
 {% endif %}
 <style>
@@ -197,6 +201,15 @@ body { overflow: hidden; }
 
 {% block content %}
 <div class="app-wrap">
+{% if customer_table %}
+<div class="cust-header">
+  <div class="cust-logo">🍽️</div>
+  <div>
+    <div class="cust-biz">{{ current_restaurant.name if current_restaurant else 'VoiceBill' }}</div>
+    <div class="cust-tag">Tap mic or add items to order</div>
+  </div>
+</div>
+{% endif %}
 <div class="app">
 
   <!-- LEFT: MENU -->
@@ -271,7 +284,7 @@ body { overflow: hidden; }
       </div>
       <button class="cfm-btn" id="cfmBtn" onclick="confirmOrder()" disabled>
         <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Confirm &amp; Generate Bill
+        Confirm &amp; Generate {{ biz_labels.get('order','Bill') }}
       </button>
     </div>
   </div>
@@ -342,6 +355,18 @@ async function init() {
   buildCatTabs();
   renderMenu();
   buildChips();
+
+  // Restore cart from localStorage
+  try {
+    const saved = localStorage.getItem('vb_cart');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Re-validate against current menu (prices may change)
+      cart = parsed.filter(c => MENU.find(m => m.id === c.item.id))
+                   .map(c => ({ item: MENU.find(m => m.id === c.item.id), qty: c.qty }));
+      if (cart.length) { renderCart(); renderMenu(); }
+    }
+  } catch(e) {}
 }
 
 function buildCatTabs() {
@@ -418,6 +443,10 @@ function clearCart() {
   cart = []; renderCart(); renderMenu(); showToast('Cart cleared', 'info');
 }
 
+function saveCart() {
+  try { localStorage.setItem('vb_cart', JSON.stringify(cart)); } catch(e) {}
+}
+
 function renderCart() {
   const cnt = cart.reduce((s, c) => s + c.qty, 0);
   document.getElementById('cartCnt').textContent = cnt;
@@ -447,6 +476,7 @@ function renderCart() {
   document.getElementById('fTot').textContent = 'Rs.' + tot;
   document.getElementById('bRows').style.display = 'flex';
   document.getElementById('cfmBtn').disabled = false;
+  saveCart();
 }
 
 // ── VOICE ─────────────────────────────────────────────────────
@@ -807,14 +837,18 @@ async function confirmOrder() {
   document.getElementById('bmSg').textContent  = 'Rs.' + half;
   document.getElementById('bmTot').textContent = 'Rs.' + tot;
   document.getElementById('billOv').classList.add('open');
+  // Order placed — clear cart
+  cart = []; renderCart(); renderMenu();
+  try { localStorage.removeItem('vb_cart'); } catch(e) {}
 }
 
 function closeBill() { document.getElementById('billOv').classList.remove('open'); }
 
 function newOrder() {
   closeBill(); cart = []; renderCart(); renderMenu();
+  try { localStorage.removeItem('vb_cart'); } catch(e) {}
   document.getElementById('txBox').classList.remove('show');
-    document.getElementById('txBox').textContent = '';
+  document.getElementById('txBox').textContent = '';
   setMic('idle'); showToast('✨ Ready for new order!', 'info');
 }
 

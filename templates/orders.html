@@ -44,17 +44,21 @@
 <div class="page">
   <div class="page-header">
     <div class="flex items-center justify-between">
-      <div><h1>Orders</h1><p>View all orders and download invoices</p></div>
+      <div><h1>{{ biz_labels.get('order','Order') }}s</h1><p>View all orders and download invoices</p></div>
       <a href="/order/new" class="btn btn-primary">+ New Order</a>
     </div>
   </div>
 
   <div class="filters">
-    <input id="search" placeholder="Search by order # or table…" oninput="filterOrders()" />
-    <select id="status-filter" onchange="filterOrders()" style="width:auto">
-      <option value="">All statuses</option>
-      <option value="placed">Placed</option>
+    <input id="search" placeholder="Search by order # or item name…" oninput="filterOrders()" />
+    {% if biz_mode == 'dine_in' %}
+    <select id="table-filter" onchange="filterOrders()" style="width:auto">
+      <option value="">All tables</option>
+      {% for i in range(1,11) %}<option value="{{ i }}">Table {{ i }}</option>{% endfor %}
     </select>
+    {% else %}
+    <select id="table-filter" style="display:none"></select>
+    {% endif %}
     <span class="text-muted text-sm" id="order-count"></span>
   </div>
 
@@ -73,11 +77,20 @@ async function loadOrders() {
   filterOrders();
 }
 function filterOrders() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const s = document.getElementById('status-filter').value;
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const t = document.getElementById('table-filter').value;
   let f = allOrders;
-  if (q) f = f.filter(o => String(o.id).includes(q) || o.table_no.includes(q));
-  if (s) f = f.filter(o => o.status===s);
+
+  // Search by order number, table, or item name
+  if (q) f = f.filter(o =>
+    String(o.id).includes(q) ||
+    o.table_no.toLowerCase().includes(q) ||
+    o.items.some(i => i.name.toLowerCase().includes(q))
+  );
+
+  // Filter by table
+  if (t) f = f.filter(o => o.table_no === t);
+
   document.getElementById('order-count').textContent = f.length + ' order' + (f.length!==1?'s':'');
   renderOrders(f);
 }
