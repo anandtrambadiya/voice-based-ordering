@@ -3,166 +3,136 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}Spice Garden{% endblock %}</title>
+  <title>{% block title %}{{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:        #0d0d0d;
-      --bg2:       #161616;
-      --bg3:       #1e1e1e;
-      --border:    #2a2a2a;
-      --text:      #f0ece4;
-      --muted:     #7a7570;
-      --accent:    #e8663d;
-      --accent2:   #f0a045;
-      --green:     #4caf82;
-      --red:       #e05252;
-      --card:      #191919;
-      --font-head: 'Playfair Display', serif;
-      --font-body: 'DM Sans', sans-serif;
-      --radius:    12px;
-      --shadow:    0 4px 24px rgba(0,0,0,0.5);
+      --bg:      #f2f6f8; --white:  #ffffff; --s1: #f8fafc; --s2: #eef2f5; --s3: #e3eaee;
+      --bdr:     #dde5ea; --bdr2:   #c5d3db;
+      --teal:    #0ea5a0; --teal2:  #0891b2;
+      --teal-lt: rgba(14,165,160,.09); --teal-bd: rgba(14,165,160,.28);
+      --green:   #16a34a; --green-bg: #dcfce7; --green-bd: #86efac;
+      --red:     #dc2626; --red-bg:  #fee2e2;
+      --amber:   #d97706;
+      --txt:     #0c1f1f; --txt2: #3d6060; --txt3: #7a9f9f; --txt4: #b0cccc;
+      --fh: 'Sora', sans-serif; --fb: 'DM Sans', sans-serif; --fm: 'JetBrains Mono', monospace;
+      --radius: 12px;
     }
+    html, body { height: 100%; background: var(--bg); color: var(--txt); font-family: var(--fb); font-size: 15px; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--s2); }
+    ::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 4px; }
 
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* ── Nav ── */
+    /* ── NAV ── */
     nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(13,13,13,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center;
-      padding: 0 28px; height: 60px; gap: 32px;
+      height: 56px; background: var(--white); border-bottom: 1.5px solid var(--bdr);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.4rem; gap: 1rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06); position: sticky; top: 0; z-index: 100;
     }
-    .nav-brand {
-      font-family: var(--font-head); font-size: 20px; color: var(--accent);
-      text-decoration: none; letter-spacing: 0.5px; flex-shrink: 0;
-    }
-    .nav-brand span { color: var(--accent2); }
-    .nav-links { display: flex; gap: 4px; flex: 1; }
-    .nav-links a {
-      text-decoration: none; color: var(--muted); padding: 6px 14px;
-      border-radius: 8px; font-size: 14px; font-weight: 500;
-      transition: color 0.2s, background 0.2s; white-space: nowrap;
-    }
-    .nav-links a:hover { color: var(--text); background: var(--bg3); }
-    .nav-links a.active { color: var(--text); background: var(--bg3); }
+    .nav-left { display: flex; align-items: center; gap: .7rem; }
+    .nav-logo { display: flex; align-items: center; gap: 7px; font-family: var(--fh); font-weight: 800; font-size: 1rem; color: var(--teal); text-decoration: none; letter-spacing: -.02em; }
+    .logo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px rgba(14,165,160,.5); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .nav-sep { width: 1px; height: 18px; background: var(--bdr); }
+    .nav-biz { font-size: .8rem; font-weight: 700; color: var(--txt2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a { text-decoration: none; color: var(--txt3); padding: .32rem .85rem; border-radius: 8px; font-size: .78rem; font-weight: 600; transition: all .2s; white-space: nowrap; }
+    .nav-links a:hover { color: var(--teal); background: var(--teal-lt); }
+    .nav-links a.active { color: var(--teal); background: var(--teal-lt); border: 1.5px solid var(--teal-bd); }
+    .nav-links a.owner-only { display: {% if current_role == 'owner' %}inline-flex{% else %}none{% endif %}; }
+    .nav-right { display: flex; align-items: center; gap: .7rem; }
+    .role-chip { padding: .2rem .7rem; border-radius: 50px; font-size: .68rem; font-weight: 700; font-family: var(--fm);
+      background: {% if current_role == 'owner' %}var(--teal-lt){% else %}var(--green-bg){% endif %};
+      color: {% if current_role == 'owner' %}var(--teal){% else %}var(--green){% endif %};
+      border: 1.5px solid {% if current_role == 'owner' %}var(--teal-bd){% else %}var(--green-bd){% endif %}; }
+    .logout-link { font-size: .75rem; font-weight: 600; color: var(--txt3); text-decoration: none; padding: .32rem .75rem; border: 1.5px solid var(--bdr2); border-radius: 8px; transition: all .2s; }
+    .logout-link:hover { color: var(--red); border-color: var(--red); background: var(--red-bg); }
 
-    /* ── Page wrapper ── */
+    /* ── PAGE ── */
     .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
 
-    /* ── Cards ── */
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px;
-    }
+    /* ── CARDS ── */
+    .card { background: var(--white); border: 1.5px solid var(--bdr); border-radius: 16px; padding: 24px; }
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 8px; font-family: var(--font-body);
-      font-size: 14px; font-weight: 500; cursor: pointer;
-      border: none; transition: all 0.18s; text-decoration: none;
-    }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: #d45a32; transform: translateY(-1px); }
-    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-ghost:hover { color: var(--text); border-color: #444; }
-    .btn-green { background: var(--green); color: #fff; }
-    .btn-green:hover { background: #3d9e6e; transform: translateY(-1px); }
-    .btn-danger { background: var(--red); color: #fff; }
-    .btn-danger:hover { background: #c74444; }
-    .btn-sm { padding: 6px 14px; font-size: 13px; }
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: .55rem 1.2rem; border-radius: 9px; font-family: var(--fb); font-size: .82rem; font-weight: 600; cursor: pointer; border: none; transition: all .18s; text-decoration: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--teal), var(--teal2)); color: #fff; box-shadow: 0 4px 14px rgba(14,165,160,.25); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(14,165,160,.35); }
+    .btn-ghost { background: transparent; color: var(--txt2); border: 1.5px solid var(--bdr2); }
+    .btn-ghost:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-lt); }
+    .btn-danger { background: var(--red-bg); color: var(--red); border: 1.5px solid #fca5a5; }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-sm { padding: .32rem .75rem; font-size: .74rem; }
 
-    /* ── Inputs ── */
-    input, select {
-      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-      border-radius: 8px; padding: 10px 14px; font-family: var(--font-body);
-      font-size: 14px; transition: border-color 0.2s; outline: none; width: 100%;
-    }
-    input:focus, select:focus { border-color: var(--accent); }
-    input::placeholder { color: var(--muted); }
-    label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+    /* ── INPUTS ── */
+    input, select { background: var(--s1); border: 1.5px solid var(--bdr); color: var(--txt); border-radius: 9px; padding: .6rem .9rem; font-family: var(--fb); font-size: .83rem; transition: border-color .2s, box-shadow .2s; outline: none; width: 100%; }
+    input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-lt); }
+    input::placeholder { color: var(--txt4); }
+    label { font-size: .75rem; font-weight: 600; color: var(--txt2); display: block; margin-bottom: 5px; }
 
-    /* ── Badge ── */
-    .badge {
-      display: inline-block; padding: 2px 10px; border-radius: 20px;
-      font-size: 12px; font-weight: 500;
-    }
-    .badge-orange { background: rgba(232,102,61,0.15); color: var(--accent); }
-    .badge-green  { background: rgba(76,175,130,0.15); color: var(--green); }
-    .badge-gray   { background: var(--bg3); color: var(--muted); }
+    /* ── BADGE ── */
+    .badge { display: inline-block; padding: .18rem .65rem; border-radius: 50px; font-size: .68rem; font-weight: 700; }
+    .badge-teal   { background: var(--teal-lt);  color: var(--teal);  border: 1px solid var(--teal-bd); }
+    .badge-green  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
+    .badge-amber  { background: #fef9c3; color: var(--amber); border: 1px solid #fde68a; }
+    .badge-gray   { background: var(--s2); color: var(--txt3); border: 1px solid var(--bdr); }
 
-    /* ── Toast ── */
-    #toast {
-      position: fixed; bottom: 24px; right: 24px; z-index: 999;
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 20px; font-size: 14px;
-      box-shadow: var(--shadow); transform: translateY(80px);
-      opacity: 0; transition: all 0.3s; pointer-events: none; max-width: 320px;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
-    #toast.success { border-left: 3px solid var(--green); }
-    #toast.error   { border-left: 3px solid var(--red); }
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 1.3rem; left: 50%; transform: translateX(-50%) translateY(50px); z-index: 999; background: var(--txt); color: #fff; padding: .55rem 1.1rem; border-radius: 10px; font-size: .78rem; font-weight: 600; box-shadow: 0 8px 22px rgba(0,0,0,.18); opacity: 0; transition: all .32s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; pointer-events: none; }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #toast.success { background: var(--green); }
+    #toast.info    { background: var(--teal); }
+    #toast.error   { background: var(--red); }
 
-    /* ── Utility ── */
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; }
-    .gap-3 { gap: 12px; }
-    .gap-4 { gap: 16px; }
-    .mt-2 { margin-top: 8px; }
-    .mt-4 { margin-top: 16px; }
-    .mt-6 { margin-top: 24px; }
-    .text-muted { color: var(--muted); }
-    .text-accent { color: var(--accent); }
-    .text-green { color: var(--green); }
-    .text-sm { font-size: 13px; }
-    .font-bold { font-weight: 600; }
-    .w-full { width: 100%; }
+    /* ── UTILS ── */
+    .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+    .gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}
+    .mt-2{margin-top:8px}.mt-4{margin-top:16px}.mt-6{margin-top:24px}
+    .text-muted{color:var(--txt3)}.text-teal{color:var(--teal)}.text-sm{font-size:.78rem}.font-bold{font-weight:700}.w-full{width:100%}
   </style>
   {% block head %}{% endblock %}
 </head>
 <body>
 <nav>
-  <a class="nav-brand" href="/">Spice <span>Garden</span></a>
-  <div class="nav-links">
-    <a href="/"       id="nav-dash">Dashboard</a>
-    <a href="/menu"   id="nav-menu">Menu</a>
-    <a href="/order/new" id="nav-order">New Order</a>
-    <a href="/orders" id="nav-orders">Orders</a>
+  <div class="nav-left">
+    <a class="nav-logo" href="/"><span class="logo-dot"></span>VoiceBill</a>
+    {% if current_restaurant %}
+    <div class="nav-sep"></div>
+    <span class="nav-biz">{{ current_restaurant.name }}</span>
+    {% endif %}
+    <div class="nav-links">
+      <a href="/" id="nav-dash" class="owner-only">Dashboard</a>
+      <a href="/menu" id="nav-menu" class="owner-only">Menu</a>
+      <a href="/order/new" id="nav-order">New Order</a>
+      <a href="/orders" id="nav-orders">Orders</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    {% if current_user %}
+    <span class="role-chip">{{ current_role }}</span>
+    <a href="/logout" class="logout-link">Logout</a>
+    {% endif %}
   </div>
 </nav>
 
 <div id="toast"></div>
-
 {% block content %}{% endblock %}
 
 <script>
-  // Highlight active nav link
   const path = location.pathname;
-  if (path === '/')           document.getElementById('nav-dash').classList.add('active');
-  if (path === '/menu')       document.getElementById('nav-menu').classList.add('active');
-  if (path.startsWith('/order/new')) document.getElementById('nav-order').classList.add('active');
-  if (path === '/orders')     document.getElementById('nav-orders').classList.add('active');
+  if (path === '/')                  document.getElementById('nav-dash')?.classList.add('active');
+  if (path === '/menu')              document.getElementById('nav-menu')?.classList.add('active');
+  if (path.startsWith('/order/new')) document.getElementById('nav-order')?.classList.add('active');
+  if (path === '/orders')            document.getElementById('nav-orders')?.classList.add('active');
 
-  // Toast helper
-  function showToast(msg, type='success') {
+  let _tt;
+  function showToast(msg, type='info') {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'show ' + type;
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.className = '', 3000);
+    t.textContent = msg; t.className = 'show ' + type;
+    clearTimeout(_tt); _tt = setTimeout(() => t.classList.remove('show'), 2700);
   }
 </script>
 {% block scripts %}{% endblock %}

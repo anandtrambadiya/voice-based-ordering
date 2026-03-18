@@ -1,61 +1,55 @@
 from flask import Blueprint, request, jsonify, render_template, session
 from models import db, Order, OrderItem, MenuItem
+from utils.auth import login_required, owner_required
 
 orders_bp = Blueprint('orders', __name__)
 
 
 @orders_bp.route('/order/new')
+@login_required
 def new_order_page():
     return render_template('order.html')
 
 
 @orders_bp.route('/orders')
+@login_required
 def orders_list_page():
     return render_template('orders.html')
 
 
-# ── API ──────────────────────────────────────────────
-
 @orders_bp.route('/api/orders', methods=['POST'])
+@login_required
 def create_order():
-    """Start a fresh order."""
+    rid      = session['restaurant_id']
     data     = request.get_json() or {}
-    table_no = data.get('table_no', '1')
-    order    = Order(table_no=table_no)
+    order    = Order(restaurant_id=rid, table_no=data.get('table_no', '1'))
     db.session.add(order)
     db.session.commit()
     return jsonify(order.to_dict()), 201
 
 
 @orders_bp.route('/api/orders/<int:order_id>/items', methods=['POST'])
+@login_required
 def add_or_update_item(order_id):
-    """Add item to cart or update quantity (+1 / set qty)."""
-    order = Order.query.get_or_404(order_id)
+    rid   = session['restaurant_id']
+    order = Order.query.filter_by(id=order_id, restaurant_id=rid).first_or_404()
     data  = request.get_json()
 
     menu_item_id = data.get('menu_item_id')
     quantity     = int(data.get('quantity', 1))
-    menu_item    = MenuItem.query.get_or_404(menu_item_id)
+    menu_item    = MenuItem.query.filter_by(id=menu_item_id, restaurant_id=rid).first_or_404()
 
-    # Check if item already in cart
-    existing = OrderItem.query.filter_by(
-        order_id=order_id, menu_item_id=menu_item_id
-    ).first()
-
+    existing = OrderItem.query.filter_by(order_id=order_id, menu_item_id=menu_item_id).first()
     if existing:
         existing.quantity = quantity
         if existing.quantity <= 0:
             db.session.delete(existing)
     else:
         if quantity > 0:
-            oi = OrderItem(
-                order_id=order_id,
-                menu_item_id=menu_item_id,
-                name=menu_item.name,
-                price=menu_item.price,
-                quantity=quantity
-            )
-            db.session.add(oi)
+            db.session.add(OrderItem(
+                order_id=order_id, menu_item_id=menu_item_id,
+                name=menu_item.name, price=menu_item.price, quantity=quantity
+            ))
 
     _recalculate(order)
     db.session.commit()
@@ -63,15 +57,18 @@ def add_or_update_item(order_id):
 
 
 @orders_bp.route('/api/orders/<int:order_id>', methods=['GET'])
+@login_required
 def get_order(order_id):
-    order = Order.query.get_or_404(order_id)
+    rid   = session['restaurant_id']
+    order = Order.query.filter_by(id=order_id, restaurant_id=rid).first_or_404()
     return jsonify(order.to_dict())
 
 
 @orders_bp.route('/api/orders/<int:order_id>/place', methods=['POST'])
+@login_required
 def place_order(order_id):
-    """Finalize and save the order."""
-    order = Order.query.get_or_404(order_id)
+    rid   = session['restaurant_id']
+    order = Order.query.filter_by(id=order_id, restaurant_id=rid).first_or_404()
     if not order.items:
         return jsonify({'error': 'Cart is empty'}), 400
     order.status = 'placed'
@@ -81,15 +78,16 @@ def place_order(order_id):
 
 
 @orders_bp.route('/api/orders', methods=['GET'])
+@login_required
 def list_orders():
-    orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
+    rid    = session['restaurant_id']
+    orders = Order.query.filter_by(restaurant_id=rid).order_by(Order.created_at.desc()).limit(50).all()
     return jsonify([o.to_dict() for o in orders])
 
 
 def _recalculate(order):
-    TAX_RATE    = 0.05          # 5% GST
-    subtotal    = sum(i.price * i.quantity for i in order.items)
-    tax         = round(subtotal * TAX_RATE, 2)
+    TAX_RATE       = 0.05
+    subtotal       = sum(i.price * i.quantity for i in order.items)
     order.subtotal = round(subtotal, 2)
-    order.tax      = tax
-    order.total    = round(subtotal + tax, 2)
+    order.tax      = round(subtotal * TAX_RATE, 2)
+    order.total    = round(subtotal + order.tax, 2)

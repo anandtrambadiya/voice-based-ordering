@@ -1,132 +1,100 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Spice Garden{% endblock %}
+{% block title %}Dashboard — {{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}
 
 {% block head %}
 <style>
-  .hero {
-    padding: 48px 0 32px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 32px;
-  }
-  .hero h1 { font-family: var(--font-head); font-size: 42px; font-weight: 900; line-height: 1.15; }
-  .hero h1 span { color: var(--accent); }
-  .hero p { color: var(--muted); margin-top: 10px; font-size: 16px; }
+.page-hero { padding: 2.2rem 0 1.6rem; border-bottom: 1.5px solid var(--bdr); margin-bottom: 2rem; }
+.page-hero h1 { font-family: var(--fh); font-size: 2rem; font-weight: 900; color: var(--txt); line-height: 1.15; }
+.page-hero h1 span { color: var(--teal); }
+.page-hero p { color: var(--txt3); margin-top: .4rem; font-size: .88rem; }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .stat-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px;
-    position: relative; overflow: hidden;
-  }
-  .stat-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: var(--accent-color, var(--accent));
-  }
-  .stat-icon { font-size: 28px; margin-bottom: 12px; }
-  .stat-value { font-family: var(--font-head); font-size: 32px; font-weight: 700; }
-  .stat-label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 14px; margin-bottom: 2rem; }
+.stat-card { background: var(--white); border: 1.5px solid var(--bdr); border-radius: 16px; padding: 1.3rem 1.4rem; position: relative; overflow: hidden; animation: fadeUp .4s ease both; }
+.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--accent-col, var(--teal)); border-radius: 16px 16px 0 0; }
+.stat-val { font-family: var(--fh); font-size: 2rem; font-weight: 900; color: var(--txt); line-height: 1; }
+.stat-lbl { font-size: .74rem; font-weight: 600; color: var(--txt3); margin-top: .35rem; }
 
-  .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .action-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 28px 24px;
-    text-decoration: none; color: var(--text);
-    transition: border-color 0.2s, transform 0.2s;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .action-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .action-card .icon { font-size: 32px; }
-  .action-card h3 { font-size: 17px; font-weight: 600; }
-  .action-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
-  .action-card .arrow { color: var(--accent); margin-top: auto; font-size: 20px; }
+.quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 14px; margin-bottom: 2rem; }
+.quick-card { background: var(--white); border: 1.5px solid var(--bdr); border-radius: 16px; padding: 1.4rem; text-decoration: none; color: var(--txt); display: flex; flex-direction: column; gap: 8px; transition: border-color .2s, transform .2s, box-shadow .2s; }
+.quick-card:hover { border-color: var(--teal); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,160,.12); }
+.quick-card .qicon { font-size: 1.8rem; }
+.quick-card h3 { font-family: var(--fh); font-size: .9rem; font-weight: 800; }
+.quick-card p { font-size: .75rem; color: var(--txt3); line-height: 1.5; }
+.quick-card .arrow { color: var(--teal); margin-top: auto; font-weight: 700; }
 
-  .recent-table { width: 100%; border-collapse: collapse; }
-  .recent-table th {
-    text-align: left; padding: 10px 16px; font-size: 12px;
-    color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .recent-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
-  .recent-table tr:last-child td { border-bottom: none; }
-  .recent-table tr:hover td { background: rgba(255,255,255,0.02); }
+.section-card { background: var(--white); border: 1.5px solid var(--bdr); border-radius: 16px; overflow: hidden; }
+.section-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.3rem; border-bottom: 1.5px solid var(--bdr); }
+.section-head h2 { font-family: var(--fh); font-size: .9rem; font-weight: 800; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; padding: .65rem 1.3rem; font-size: .67rem; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: .08em; border-bottom: 1.5px solid var(--bdr); }
+.data-table td { padding: .85rem 1.3rem; border-bottom: 1px solid var(--s2); font-size: .82rem; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--s1); }
+.order-id { font-family: var(--fm); font-size: .75rem; color: var(--teal); font-weight: 600; }
 
-  @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
-  .stat-card, .action-card { animation: fadeUp 0.4s ease both; }
-  .stat-card:nth-child(2) { animation-delay: 0.05s; }
-  .stat-card:nth-child(3) { animation-delay: 0.1s; }
-  .stat-card:nth-child(4) { animation-delay: 0.15s; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+.stat-card:nth-child(2){animation-delay:.06s}.stat-card:nth-child(3){animation-delay:.12s}.stat-card:nth-child(4){animation-delay:.18s}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page">
-  <div class="hero">
-    <h1>Good evening,<br><span>Chef.</span></h1>
-    <p>Here's what's happening at Spice Garden today.</p>
+  <div class="page-hero">
+    <h1>Good day, <span>{{ current_restaurant.name if current_restaurant else 'there' }}.</span></h1>
+    <p>Here's what's happening today.</p>
   </div>
 
-  <div class="stats-grid" id="stats-grid">
-    <div class="stat-card" style="--accent-color: var(--accent)">
-      <div class="stat-icon">🧾</div>
-      <div class="stat-value" id="stat-orders">—</div>
-      <div class="stat-label">Orders today</div>
+  <div class="stats-grid">
+    <div class="stat-card" style="--accent-col:var(--teal)">
+      <div class="stat-val" id="stat-orders">—</div>
+      <div class="stat-lbl">Orders today</div>
     </div>
-    <div class="stat-card" style="--accent-color: var(--green)">
-      <div class="stat-icon">💰</div>
-      <div class="stat-value" id="stat-revenue">—</div>
-      <div class="stat-label">Revenue today</div>
+    <div class="stat-card" style="--accent-col:var(--green)">
+      <div class="stat-val" id="stat-revenue">—</div>
+      <div class="stat-lbl">Revenue today</div>
     </div>
-    <div class="stat-card" style="--accent-color: var(--accent2)">
-      <div class="stat-icon">🍽️</div>
-      <div class="stat-value" id="stat-items">—</div>
-      <div class="stat-label">Menu items</div>
+    <div class="stat-card" style="--accent-col:#f59e0b">
+      <div class="stat-val" id="stat-items">—</div>
+      <div class="stat-lbl">Menu items</div>
     </div>
-    <div class="stat-card" style="--accent-color: #a78bfa">
-      <div class="stat-icon">📋</div>
-      <div class="stat-value" id="stat-pending">—</div>
-      <div class="stat-label">Pending orders</div>
+    <div class="stat-card" style="--accent-col:#8b5cf6">
+      <div class="stat-val" id="stat-pending">—</div>
+      <div class="stat-lbl">Pending orders</div>
     </div>
   </div>
 
-  <div class="quick-actions">
-    <a href="/order/new" class="action-card">
-      <div class="icon">🎤</div>
+  <div class="quick-grid">
+    <a href="/order/new" class="quick-card">
+      <div class="qicon">🎤</div>
       <h3>New Voice Order</h3>
-      <p>Start a new order. Speak items in English, Hindi or Hinglish.</p>
+      <p>Speak items in English, Hindi or Hinglish.</p>
       <div class="arrow">→</div>
     </a>
-    <a href="/menu" class="action-card">
-      <div class="icon">📋</div>
+    <a href="/menu" class="quick-card">
+      <div class="qicon">📋</div>
       <h3>Manage Menu</h3>
-      <p>Add, edit or remove items and set prices.</p>
+      <p>Add, edit or remove items and prices.</p>
       <div class="arrow">→</div>
     </a>
-    <a href="/orders" class="action-card">
-      <div class="icon">📦</div>
+    <a href="/orders" class="quick-card">
+      <div class="qicon">📦</div>
       <h3>View Orders</h3>
-      <p>Browse all orders, download invoices.</p>
+      <p>Browse all orders and download invoices.</p>
       <div class="arrow">→</div>
     </a>
   </div>
 
-  <div class="card">
-    <div class="flex items-center justify-between" style="margin-bottom:16px">
-      <h2 style="font-size:17px;font-weight:600;">Recent Orders</h2>
+  <div class="section-card">
+    <div class="section-head">
+      <h2>Recent Orders</h2>
       <a href="/orders" class="btn btn-ghost btn-sm">View all</a>
     </div>
-    <table class="recent-table">
-      <thead>
-        <tr>
-          <th>Order</th>
-          <th>Table</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody id="recent-orders-body">
-        <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:32px">Loading…</td></tr>
+    <table class="data-table">
+      <thead><tr>
+        <th>Order</th><th>Table</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th>
+      </tr></thead>
+      <tbody id="recent-body">
+        <tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--txt4)">Loading…</td></tr>
       </tbody>
     </table>
   </div>
@@ -135,39 +103,26 @@
 
 {% block scripts %}
 <script>
-async function loadDashboard() {
-  const [ordersRes, menuRes] = await Promise.all([
-    fetch('/api/orders'),
-    fetch('/api/menu')
-  ]);
-  const orders = await ordersRes.json();
-  const menu   = await menuRes.json();
-
-  const today = new Date().toDateString();
-  const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
-
-  document.getElementById('stat-orders').textContent  = todayOrders.length;
-  document.getElementById('stat-revenue').textContent = '₹' + todayOrders.reduce((s,o) => s + o.total, 0).toFixed(0);
+async function load() {
+  const [oRes, mRes] = await Promise.all([fetch('/api/orders'), fetch('/api/menu')]);
+  const orders = await oRes.json(), menu = await mRes.json();
+  const today  = new Date().toDateString();
+  const tod    = orders.filter(o => new Date(o.created_at).toDateString() === today);
+  document.getElementById('stat-orders').textContent  = tod.length;
+  document.getElementById('stat-revenue').textContent = 'Rs.' + tod.reduce((s,o)=>s+o.total,0).toFixed(0);
   document.getElementById('stat-items').textContent   = menu.length;
-  document.getElementById('stat-pending').textContent = orders.filter(o => o.status === 'pending').length;
-
-  const tbody = document.getElementById('recent-orders-body');
-  const recent = orders.slice(0, 8);
-  if (!recent.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:32px">No orders yet</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = recent.map(o => `
-    <tr>
-      <td><span style="color:var(--accent);font-weight:600">#${String(o.id).padStart(4,'0')}</span></td>
-      <td>Table ${o.table_no}</td>
-      <td>${o.items.length} item${o.items.length !== 1 ? 's' : ''}</td>
-      <td style="font-weight:600">₹${o.total.toFixed(2)}</td>
-      <td><span class="badge ${o.status === 'placed' ? 'badge-green' : 'badge-orange'}">${o.status}</span></td>
-      <td class="text-muted">${o.created_at}</td>
-    </tr>
-  `).join('');
+  document.getElementById('stat-pending').textContent = orders.filter(o=>o.status==='pending').length;
+  const tbody = document.getElementById('recent-body');
+  if (!orders.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--txt4)">No orders yet</td></tr>`; return; }
+  tbody.innerHTML = orders.slice(0,8).map(o => `<tr>
+    <td><span class="order-id">#${String(o.id).padStart(4,'0')}</span></td>
+    <td>Table ${o.table_no}</td>
+    <td>${o.items.length} item${o.items.length!==1?'s':''}</td>
+    <td style="font-weight:700">Rs.${o.total.toFixed(2)}</td>
+    <td><span class="badge ${o.status==='placed'?'badge-green':'badge-amber'}">${o.status}</span></td>
+    <td class="text-muted text-sm">${o.created_at}</td>
+  </tr>`).join('');
 }
-loadDashboard();
+load();
 </script>
 {% endblock %}
