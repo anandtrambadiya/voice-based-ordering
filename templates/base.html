@@ -108,6 +108,8 @@
       <a href="/menu" id="nav-menu" class="owner-only">Menu</a>
       <a href="/order/new" id="nav-order">New Order</a>
       <a href="/orders" id="nav-orders">Orders</a>
+      <a href="/analytics" id="nav-analytics" class="owner-only">Analytics</a>
+      <a href="/tables" id="nav-tables" class="owner-only">QR Tables</a>
     </div>
   </div>
   <div class="nav-right">
@@ -127,6 +129,8 @@
   if (path === '/menu')              document.getElementById('nav-menu')?.classList.add('active');
   if (path.startsWith('/order/new')) document.getElementById('nav-order')?.classList.add('active');
   if (path === '/orders')            document.getElementById('nav-orders')?.classList.add('active');
+  if (path === '/analytics')         document.getElementById('nav-analytics')?.classList.add('active');
+  if (path === '/tables')            document.getElementById('nav-tables')?.classList.add('active');
 
   let _tt;
   function showToast(msg, type='info') {

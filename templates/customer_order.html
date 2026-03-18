@@ -1,14 +1,12 @@
-{% extends "base.html" %}
-{% block title %}New Order — {{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}
-
-{% block head %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order — {{ restaurant.name if restaurant else 'VoiceBill' }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-{% if customer_table %}
-<style>
-nav { display: none !important; }
-.app-wrap { height: 100vh !important; }
-</style>
-{% endif %}
 <style>
 body { overflow: hidden; }
 .app-wrap { display: flex; flex-direction: column; height: calc(100vh - 56px); overflow: hidden; }
@@ -164,38 +162,21 @@ body { overflow: hidden; }
 @media(max-width:860px){
   html,body{overflow:auto;}
   .app-wrap{height:auto;overflow:visible;}
-
-  /* Stack: voice+cart first, menu second */
-  .app{grid-template-columns:1fr;display:flex;flex-direction:column;}
-  .menu-col{order:2;overflow:visible;min-height:auto;border-right:none;border-top:1.5px solid var(--bdr);}
-  .order-col{order:1;overflow:visible;min-height:auto;height:auto;}
-
-  /* Voice panel — compact */
-  .vz{padding:.75rem 1rem .6rem;}
-  .mic-wrap{width:64px;height:64px;margin:.3rem auto .4rem;}
-  .mic{width:64px;height:64px;}
-  .mic svg{width:26px;height:26px;}
-  .mring.r1{inset:-7px;}
-  .mring.r2{inset:-14px;}
-
-  /* Cart */
-  .cart-col{min-height:auto;overflow:visible;}
-  .cart-items{padding:.5rem 1rem;}
-
-  /* Sticky bill footer */
-  .bill-ft{position:sticky;bottom:0;background:#fff;border-top:1.5px solid var(--bdr);z-index:10;padding:.7rem 1rem;}
-
-  /* Menu below — 2 cols */
-  .menu-scroll{overflow:visible;max-height:none;padding:.8rem 1rem;}
-  .m-grid{grid-template-columns:repeat(2,1fr);gap:.5rem;}
-  .m-card{padding:.65rem;}
-  .m-nm{font-size:.72rem;}
-  .m-pr{font-size:.74rem;}
+  .app{grid-template-columns:1fr;}
+  .menu-col,.order-col{overflow:visible;min-height:auto;}
+  .menu-scroll{overflow:visible;}
+  .cart-col{min-height:200px;overflow:visible;}
+  .m-grid{grid-template-columns:repeat(2,1fr);}
 }
 </style>
-{% endblock %}
-
-{% block content %}
+/* Toast styles */
+.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;}
+.toast{padding:.55rem 1rem;border-radius:10px;font-size:.8rem;font-weight:600;color:#fff;animation:tslide .3s ease;font-family:var(--fb);box-shadow:0 4px 16px rgba(0,0,0,.15);}
+.toast.success{background:#16a34a;}.toast.error{background:#dc2626;}.toast.info{background:#0ea5a0;}
+@keyframes tslide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
 <div class="app-wrap">
 <div class="app">
 
@@ -217,18 +198,19 @@ body { overflow: hidden; }
       <div class="vz-row">
         <span class="vz-lbl">Voice Order <span style="font-size:.55rem;color:var(--teal);font-weight:500;text-transform:none;letter-spacing:0">(tap to start/stop)</span></span>
         <div class="tbl-chip">Table
-          {% if customer_table %}
-            <span style="font-weight:800;padding:0 2px">{{ customer_table }}</span>
-            <input type="hidden" id="tableNo" value="{{ customer_table }}">
-          {% else %}
-            <select id="tableNo">
-              {% for i in range(1,11) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
-            </select>
-          {% endif %}
+          <select id="tableNo">
+            {% for i in range(1,11) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+          </select>
         </div>
       </div>
       <div style="margin-bottom:.6rem">
-        </div>
+        <input id="customerMobile" type="tel" placeholder="Customer mobile (optional)"
+          style="font-size:.74rem;padding:.38rem .8rem;border-radius:8px;border:1.5px solid var(--bdr);background:var(--s1);color:var(--txt);outline:none;width:100%;font-family:var(--fb);"
+          onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--bdr)'"/>
+      </div>
+      <input id="customerMobile" type="tel" placeholder="Customer mobile (optional)"
+        style="font-size:.74rem;padding:.38rem .8rem;border-radius:8px;border:1.5px solid var(--bdr);background:var(--s1);color:var(--txt);outline:none;width:100%;font-family:var(--fb);margin-bottom:.6rem;"
+        onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--bdr)'"/>
       <div class="mic-wrap" id="micWrap">
         <div class="mring r1"></div><div class="mring r2"></div>
         <button class="mic idle" id="micBtn" onclick="toggleMic()">
@@ -296,7 +278,9 @@ body { overflow: hidden; }
         <div class="bm-ir"><span class="lb">Table</span><span class="vl" id="bmTbl">—</span></div>
         <div class="bm-ir"><span class="lb">Date &amp; Time</span><span class="vl" id="bmTime">—</span></div>
         <div class="bm-ir"><span class="lb">Business</span><span class="vl" id="bmBiz">—</span></div>
-        </div>
+        <div class="bm-ir" id="bmMobileRow" style="display:none"><span class="lb">Customer</span><span class="vl" id="bmMobile">—</span></div>
+        <div class="bm-ir" id="bmMobileRow" style="display:none"><span class="lb">Customer</span><span class="vl" id="bmMobile">—</span></div>
+      </div>
       <div class="bm-sec">
         <div class="bm-lbl">Items Ordered</div>
         <div class="bi-table" id="bmItems"></div>
@@ -310,7 +294,7 @@ body { overflow: hidden; }
           <div class="trow grand"><span>Total Payable</span><span class="ga" id="bmTot">Rs.0</span></div>
         </div>
       </div>
-      <div class="bm-thanks">Thank you for visiting! 🙏<br><b style="color:var(--teal)" id="bmBizName">{{ current_restaurant.name if current_restaurant else 'Spice Garden' }}</b> · Powered by VoiceBill</div>
+      <div class="bm-thanks">Thank you for visiting! 🙏<br><b style="color:var(--teal)" id="bmBizName">{{ restaurant.name if restaurant else (current_restaurant.name if current_restaurant else 'Spice Garden') }}</b> · Powered by VoiceBill</div>
       <div class="bm-acts">
         <button class="bact" onclick="printBill()">
           <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -325,19 +309,17 @@ body { overflow: hidden; }
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
 <script>
 // ── STATE ─────────────────────────────────────────────────────
 let MENU = [], cart = [], curCat = 'all', curQ = '', curOrderId = null;
-const BIZ_NAME = '{{ current_restaurant.name if current_restaurant else "Spice Garden" }}';
+const BIZ_NAME = '{{ restaurant.name if restaurant else (current_restaurant.name if current_restaurant else "Spice Garden") }}';
+const PAGE_TOKEN = '{{ token if token else "" }}';
+const PAGE_TABLE = '{{ table_no if table_no else "" }}';
 
-const CTOKEN = '{{ customer_token if customer_token else "" }}';
 // ── BOOT ──────────────────────────────────────────────────────
 async function init() {
-  const menuUrl = CTOKEN ? `/api/customer/menu?r=${CTOKEN}` : '/api/menu';
-  const res = await fetch(menuUrl);
+  const url = PAGE_TOKEN ? `/api/customer/menu?r=${PAGE_TOKEN}` : '/api/menu';
+  const res = await fetch(url);
   MENU = await res.json();
   buildCatTabs();
   renderMenu();
@@ -632,7 +614,9 @@ const VOICE_CMDS = [
     action: () => {
       cart = []; renderCart(); renderMenu();
       document.getElementById('txBox').classList.remove('show');
-          document.getElementById('txBox').textContent = '';
+  const mob = document.getElementById('customerMobile'); if(mob) mob.value = '';
+  const mob = document.getElementById('customerMobile'); if (mob) mob.value = '';
+      document.getElementById('txBox').textContent = '';
       showToast('🗑️ Everything cleared', 'info');
     },
     feedback: '🗑️ All cleared'
@@ -766,27 +750,20 @@ function editDistance(a, b) {
 // ── CONFIRM ORDER → Flask DB ───────────────────────────────────
 async function confirmOrder() {
   if (!cart.length) return;
-  const table = document.getElementById('tableNo').value;
-  let final, orderId;
+  const table  = document.getElementById('tableNo').value;
+  const mobile = document.getElementById('customerMobile')?.value.trim() || null;
 
-  if (CTOKEN) {
-    const r = await fetch('/api/customer/order', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ token: CTOKEN, table_no: table, items: cart.map(c=>({menu_item_id:c.item.id,quantity:c.qty})) }) });
-    const d = await r.json();
-    orderId = d.order_id;
-    const sub = cart.reduce((s,c)=>s+c.item.price*c.qty,0);
-    final = { subtotal: sub, tax: Math.round(sub*.05), total: sub+Math.round(sub*.05) };
-  } else {
-    const r1 = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ table_no: table }) });
-    const order = await r1.json();
-    for (const { item, qty } of cart) {
-      await fetch(`/api/orders/${order.id}/items`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ menu_item_id: item.id, quantity: qty }) });
-    }
-    const r3 = await fetch(`/api/orders/${order.id}/place`, { method:'POST' });
-    final = await r3.json();
-    orderId = order.id;
-  }
-  curOrderId = orderId;
+  // Single API call — create + place in one shot
+  const res   = await fetch('/api/orders', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      table_no:        table,
+      customer_mobile: mobile || null,
+      items: cart.map(c => ({ menu_item_id: c.item.id, quantity: c.qty }))
+    })
+  });
+  const final = await res.json();
+  curOrderId  = final.id;
 
   const sub = final.subtotal, gst = final.tax, tot = final.total;
   const half = (gst / 2).toFixed(2);
@@ -796,6 +773,9 @@ async function confirmOrder() {
   document.getElementById('bmTbl').textContent  = 'Table ' + table;
   document.getElementById('bmTime').textContent = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' · ' + now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('bmBiz').textContent  = BIZ_NAME;
+  if (mobile) { document.getElementById('bmMobile').textContent = mobile; document.getElementById('bmMobileRow').style.display = ''; }
+  else { document.getElementById('bmMobileRow').style.display = 'none'; }
+  if (mobile) { document.getElementById('bmMobile').textContent = mobile; document.getElementById('bmMobileRow').style.display = ''; } else { document.getElementById('bmMobileRow').style.display = 'none'; }
   document.getElementById('bmBizName').textContent = BIZ_NAME;
   document.getElementById('bmItems').innerHTML  = cart.map(c => `
     <div class="bi-row">
@@ -814,7 +794,8 @@ function closeBill() { document.getElementById('billOv').classList.remove('open'
 function newOrder() {
   closeBill(); cart = []; renderCart(); renderMenu();
   document.getElementById('txBox').classList.remove('show');
-    document.getElementById('txBox').textContent = '';
+  const mob = document.getElementById('customerMobile'); if (mob) mob.value = '';
+  document.getElementById('txBox').textContent = '';
   setMic('idle'); showToast('✨ Ready for new order!', 'info');
 }
 
@@ -837,4 +818,15 @@ function printBill() { window.print(); }
 
 init();
 </script>
-{% endblock %}
+<script>
+function showToast(msg, type='info') {
+  const tc = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+</body>
+</html>

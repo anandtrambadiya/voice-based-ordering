@@ -18,13 +18,17 @@ def create_app():
     from routes.billing  import billing_bp
     from routes.voice    import voice_bp
     from routes.auth     import auth_bp
-    from routes.onboard  import onboard_bp
+    from routes.onboard   import onboard_bp
+    from routes.analytics import analytics_bp
+    from routes.customer  import customer_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu_bp)
     app.register_blueprint(orders_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(voice_bp)
+    app.register_blueprint(analytics_bp)
+    app.register_blueprint(customer_bp)
     app.register_blueprint(onboard_bp)
 
     # Load current user into g on every request
@@ -48,4 +52,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

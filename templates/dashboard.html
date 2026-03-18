@@ -59,7 +59,7 @@
     </div>
     <div class="stat-card" style="--accent-col:#8b5cf6">
       <div class="stat-val" id="stat-pending">—</div>
-      <div class="stat-lbl">Pending orders</div>
+      <div class="stat-lbl">Total orders</div>
     </div>
   </div>
 
@@ -111,7 +111,7 @@ async function load() {
   document.getElementById('stat-orders').textContent  = tod.length;
   document.getElementById('stat-revenue').textContent = 'Rs.' + tod.reduce((s,o)=>s+o.total,0).toFixed(0);
   document.getElementById('stat-items').textContent   = menu.length;
-  document.getElementById('stat-pending').textContent = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('stat-pending').textContent = orders.length;
   const tbody = document.getElementById('recent-body');
   if (!orders.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--txt4)">No orders yet</td></tr>`; return; }
   tbody.innerHTML = orders.slice(0,8).map(o => `<tr>
