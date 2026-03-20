@@ -1,4 +1,0 @@
-flask
-flask-sqlalchemy
-openai-whisper
-fpdf2
