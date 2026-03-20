@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Your Business – VoiceBill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#0ea5a0;--teal-light:#14d9d3;--teal-dark:#087c78;
+    --teal-bg:rgba(14,165,160,.08);--teal-bd:rgba(14,165,160,.22);
+    --blue:#3b82f6;--green:#16a34a;--green-bg:#dcfce7;
+    --red:#dc2626;--red-bg:#fee2e2;
+    --bg:#f0fafa;--white:#ffffff;--surface:#f7fefe;
+    --text:#0d2626;--muted:#4d7070;--border:#cde8e8;--border2:#a8d5d3;
+    --grad-btn:linear-gradient(135deg,#0ea5a0,#3b82f6);
+    --fh:'Sora',sans-serif;--fb:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+  .topbar{height:64px;flex-shrink:0;background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;box-shadow:0 2px 8px rgba(14,165,160,.08);position:sticky;top:0;z-index:50}
+  .topbar-logo{display:flex;align-items:center;gap:10px;font-family:var(--fh);font-weight:800;font-size:1.2rem;color:var(--teal-dark);text-decoration:none;letter-spacing:-.02em}
+  .logo-icon{width:38px;height:38px;background:var(--grad-btn);border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .logo-icon svg{width:20px;height:20px;fill:white}
+  .topbar-back{display:flex;align-items:center;gap:6px;padding:.38rem .9rem;border:1.5px solid var(--border2);border-radius:9px;color:var(--muted);font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s}
+  .topbar-back:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-bg)}
+  .topbar-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5}
+  .page{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 64px)}
+  .left-panel{background:linear-gradient(145deg,#0a3030 0%,#0d2a40 60%,#082035 100%);padding:5rem 4rem;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+  .left-blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
+  .lb1{width:380px;height:380px;background:rgba(14,165,160,.18);top:-80px;right:-80px}
+  .lb2{width:260px;height:260px;background:rgba(59,130,246,.14);bottom:-60px;left:-40px}
+  .left-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,160,.18);border:1px solid rgba(14,165,160,.35);color:var(--teal-light);border-radius:50px;padding:.35rem 1rem;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.5rem;width:fit-content}
+  .left-badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--teal-light);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+  .left-panel h1{font-family:var(--fh);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:900;color:#fff;line-height:1.15;letter-spacing:-.03em;margin-bottom:1rem}
+  .left-panel h1 .hl{background:linear-gradient(135deg,var(--teal-light),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .left-panel>p{font-size:.98rem;color:rgba(255,255,255,.65);line-height:1.75;margin-bottom:2.5rem;max-width:380px}
+  .feature-list{display:flex;flex-direction:column;gap:.85rem}
+  .feat-item{display:flex;align-items:flex-start;gap:12px}
+  .feat-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:rgba(14,165,160,.18);border:1px solid rgba(14,165,160,.3);display:flex;align-items:center;justify-content:center;font-size:1rem}
+  .feat-text strong{display:block;color:#fff;font-size:.9rem;font-weight:600;margin-bottom:2px}
+  .feat-text span{color:rgba(255,255,255,.55);font-size:.8rem;line-height:1.4}
+  .left-testimonial{margin-top:3rem;padding:1.2rem 1.4rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px}
+  .left-testimonial p{font-size:.88rem;color:rgba(255,255,255,.8);font-style:italic;line-height:1.6;margin-bottom:.7rem}
+  .left-testimonial .author{display:flex;align-items:center;gap:8px}
+  .author-av{width:32px;height:32px;border-radius:50%;background:var(--grad-btn);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;color:white;font-family:var(--fh)}
+  .author-name{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.85)}
+  .author-role{font-size:.72rem;color:rgba(255,255,255,.45)}
+  .right-panel{background:var(--white);padding:3.5rem 4rem;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+  .form-header{margin-bottom:2rem}
+  .form-header h2{font-family:var(--fh);font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:.4rem}
+  .form-header p{font-size:.9rem;color:var(--muted);line-height:1.6}
+  .progress-bar{display:flex;gap:4px;margin-bottom:2rem}
+  .prog-seg{flex:1;height:4px;border-radius:4px;background:var(--border);transition:background .4s}
+  .prog-seg.done{background:var(--grad-btn)}
+  .form-body{display:flex;flex-direction:column;gap:1rem}
+  .field{display:flex;flex-direction:column;gap:.35rem}
+  .field label{font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+  .field label .req{color:var(--teal);margin-left:2px}
+  .field input,.field select{padding:.72rem 1rem;border:1.5px solid var(--border);border-radius:11px;font-family:var(--fb);font-size:.9rem;color:var(--text);background:var(--surface);outline:none;transition:border-color .2s,box-shadow .2s}
+  .field input:focus,.field select:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-bg)}
+  .field input::placeholder{color:#b0cccc}
+  .field input.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.07)}
+  .field .err-msg{font-size:.74rem;color:var(--red);display:none}
+  .field .err-msg.show{display:block}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem}
+  .plan-card{border:1.5px solid var(--border);border-radius:14px;padding:1rem .8rem;cursor:pointer;transition:all .22s;background:var(--surface);text-align:center;user-select:none}
+  .plan-card:hover{border-color:var(--teal);background:#f0fdfc;transform:translateY(-2px)}
+  .plan-card.sel{border-color:var(--teal);background:linear-gradient(135deg,#e0f7f7,#dff0ff);box-shadow:0 0 0 3px var(--teal-bg)}
+  .plan-card.sel .plan-name{color:var(--teal-dark)}
+  .plan-emoji{font-size:1.5rem;margin-bottom:.35rem}
+  .plan-name{font-family:var(--fh);font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+  .plan-hint{font-size:.65rem;color:var(--muted);line-height:1.3}
+  .plan-link{font-size:.65rem;color:var(--teal);font-weight:700;text-decoration:none;display:inline-block;margin-top:.3rem}
+  .plan-link:hover{text-decoration:underline}
+  .plan-check{display:none;width:18px;height:18px;border-radius:50%;background:var(--grad-btn);margin:.4rem auto 0;align-items:center;justify-content:center}
+  .plan-check svg{width:10px;height:10px;stroke:white;fill:none;stroke-width:3}
+  .plan-card.sel .plan-check{display:flex}
+  .submit-btn{width:100%;padding:.9rem;border:none;border-radius:12px;background:var(--grad-btn);color:#fff;font-family:var(--fh);font-weight:800;font-size:.95rem;cursor:pointer;transition:all .22s;letter-spacing:.01em;box-shadow:0 4px 16px rgba(14,165,160,.3);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:.5rem}
+  .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,160,.4)}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .submit-btn svg{width:17px;height:17px;stroke:white;fill:none;stroke-width:2.5}
+  .form-footer-note{text-align:center;font-size:.78rem;color:var(--muted);margin-top:.8rem}
+  .form-footer-note a{color:var(--teal);font-weight:600;text-decoration:none}
+  .info-box{background:linear-gradient(135deg,#e0f7f7,#dff0ff);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;display:flex;gap:.7rem;align-items:flex-start}
+  .info-box span{font-size:1.1rem;flex-shrink:0}
+  .info-box p{font-size:.82rem;color:var(--teal-dark);line-height:1.6;margin:0}
+  .success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem}
+  .success-screen.show{display:flex}
+  .success-anim{width:90px;height:90px;border-radius:50%;background:var(--green-bg);border:3px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1.4rem;animation:bounce-in .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes bounce-in{from{transform:scale(0)}to{transform:scale(1)}}
+  .success-screen h2{font-family:var(--fh);font-size:1.5rem;font-weight:800;margin-bottom:.5rem}
+  .success-screen p{color:var(--muted);font-size:.92rem;line-height:1.7;max-width:360px;margin-bottom:1rem}
+  .ref-badge{display:inline-block;background:var(--teal-bg);border:1.5px solid var(--teal-bd);border-radius:10px;padding:.55rem 1.4rem;font-family:var(--fh);font-size:1rem;font-weight:800;color:var(--teal-dark);letter-spacing:.03em;margin-bottom:1rem}
+  .email-note{font-size:.82rem;color:var(--muted);margin-bottom:2rem}
+  .email-note b{color:var(--text)}
+  .success-actions{display:flex;flex-direction:column;gap:.7rem;width:100%;max-width:340px}
+  .btn-primary-full{width:100%;padding:.85rem;border:none;border-radius:12px;background:var(--grad-btn);color:#fff;font-family:var(--fh);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(14,165,160,.28);text-decoration:none;text-align:center;display:block}
+  .btn-primary-full:hover{transform:translateY(-2px)}
+  .btn-outline-full{width:100%;padding:.83rem;border:2px solid var(--teal);border-radius:12px;background:transparent;color:var(--teal);font-family:var(--fh);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;text-align:center;display:block;text-decoration:none}
+  .btn-outline-full:hover{background:var(--teal);color:white}
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:.6rem 1.3rem;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;pointer-events:none;display:flex;align-items:center;gap:7px}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.success{background:#16a34a}
+  .toast.error{background:var(--red)}
+  @media(max-width:900px){.page{grid-template-columns:1fr}.left-panel{display:none}.right-panel{padding:2.5rem 1.8rem}}
+  @media(max-width:520px){.right-panel{padding:2rem 1.2rem}.field-row{grid-template-columns:1fr}.plan-grid{grid-template-columns:1fr;gap:.55rem}.plan-card{display:flex;align-items:center;gap:1rem;text-align:left;padding:.8rem 1rem}.plan-emoji{font-size:1.3rem;margin-bottom:0}.plan-check{margin:0 0 0 auto}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="/" class="topbar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zm0 0"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3M8 22h8" stroke="white" stroke-width="1.8" fill="none"/></svg>
+    </div>
+    VoiceBill
+  </a>
+  <a href="/" class="topbar-back">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</header>
+
+<div class="page">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-blob lb1"></div>
+    <div class="left-blob lb2"></div>
+    <div class="left-badge"><span class="pulse"></span> Join 500+ Businesses</div>
+    <h1>Register Your<br>Business with<br><span class="hl">VoiceBill</span></h1>
+    <p>For restaurants, cafes, medical shops, grocery stores &amp; marts — automate billing with voice in minutes.</p>
+    <div class="feature-list">
+      <div class="feat-item">
+        <div class="feat-icon">🎙️</div>
+        <div class="feat-text"><strong>Voice-Powered Ordering</strong><span>Customers speak, system listens. 99.8% accuracy.</span></div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🧾</div>
+        <div class="feat-text"><strong>Auto Bill Generation</strong><span>Bills created instantly the moment orders are confirmed.</span></div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">📊</div>
+        <div class="feat-text"><strong>Sales Analytics</strong><span>Track revenue, peak hours, and top items effortlessly.</span></div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">👥</div>
+        <div class="feat-text"><strong>Staff Management</strong><span>Add cashiers and manage roles with ease.</span></div>
+      </div>
+    </div>
+    <div class="left-testimonial">
+      <p>"VoiceBill cut our billing errors by 80% in the first week. Our customers love how smooth it is."</p>
+      <div class="author">
+        <div class="author-av">R</div>
+        <div>
+          <div class="author-name">Rahul Mehta</div>
+          <div class="author-role">Owner, Spice Garden · Mumbai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div id="formView">
+      <div class="form-header">
+        <h2>Register Your Business</h2>
+        <p>Fill in your details. Our team reviews within 24 hours and sends your login credentials once approved.</p>
+      </div>
+      <div class="progress-bar" id="progressBar">
+        <div class="prog-seg" id="ps1"></div><div class="prog-seg" id="ps2"></div>
+        <div class="prog-seg" id="ps3"></div><div class="prog-seg" id="ps4"></div>
+        <div class="prog-seg" id="ps5"></div><div class="prog-seg" id="ps6"></div>
+      </div>
+      <div class="form-body">
+        <div class="field">
+          <label>Business Name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="e.g. Spice Garden, City Medical" oninput="updateProgress()">
+          <span class="err-msg" id="e-name">Please enter your business name</span>
+        </div>
+        <div class="field">
+          <label>Business Type <span class="req">*</span></label>
+          <select id="f-type" onchange="updateProgress()">
+            <option value="">— Select business type —</option>
+            <option value="restaurant">🍽️ Restaurant</option>
+            <option value="medical">💊 Medical Shop</option>
+            <option value="grocery">🛒 Grocery Store</option>
+            <option value="supermart">🏪 Supermart</option>
+          </select>
+          <span class="err-msg" id="e-type">Please select a business type</span>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" id="f-email" placeholder="owner@business.com" oninput="updateProgress()">
+            <span class="err-msg" id="e-email">Please enter a valid email</span>
+          </div>
+          <div class="field">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" id="f-phone" placeholder="+91 98765 43210" oninput="updateProgress()">
+            <span class="err-msg" id="e-phone">Please enter a phone number</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>City <span class="req">*</span></label>
+          <input type="text" id="f-city" placeholder="e.g. Mumbai, Rajkot, Bengaluru…" oninput="updateProgress()">
+          <span class="err-msg" id="e-city">Please enter your city</span>
+        </div>
+        <div class="field">
+          <label>Choose Your Plan <span class="req">*</span></label>
+          <div class="plan-grid">
+            <div class="plan-card" id="pc-payg" onclick="pickPlan('Pay As You Go','payg',this)">
+              <div class="plan-emoji">📅</div>
+              <div class="plan-name">Pay As You Go</div>
+              <div class="plan-hint">Monthly subscription, cancel anytime</div>
+              <a href="/plans/payg" target="_blank" onclick="event.stopPropagation()" class="plan-link">View details →</a>
+              <div class="plan-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="plan-card" id="pc-oti" onclick="pickPlan('One Time Integration','oti',this)">
+              <div class="plan-emoji">⚡</div>
+              <div class="plan-name">One Time</div>
+              <div class="plan-hint">Integrate into your existing website</div>
+              <a href="/plans/oti" target="_blank" onclick="event.stopPropagation()" class="plan-link">View details →</a>
+              <div class="plan-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <div class="plan-card" id="pc-new" onclick="pickPlan('Create New Website','new',this)">
+              <div class="plan-emoji">🌐</div>
+              <div class="plan-name">New Website</div>
+              <div class="plan-hint">Complete ordering site built for you</div>
+              <a href="/plans/newwebsite" target="_blank" onclick="event.stopPropagation()" class="plan-link">View details →</a>
+              <div class="plan-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+          <span class="err-msg" id="e-plan">Please choose a plan to continue</span>
+          <input type="hidden" id="f-plan">
+        </div>
+        <div class="info-box">
+          <span>📋</span>
+          <p>After submission, our team reviews within <strong>24 hours</strong>. If you chose <strong>New Website</strong>, your login credentials will be emailed. For other plans, our team will contact you to discuss next steps.</p>
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Submit Registration
+        </button>
+        <p class="form-footer-note">
+          Already registered? <a href="/login">Log in here →</a>
+          &nbsp;·&nbsp; <a href="/">Back to home</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div class="success-screen" id="successView">
+      <div class="success-anim">🎉</div>
+      <h2>You're registered!</h2>
+      <p id="successMsg">Your application has been received. Our team will review it and get back to you within <strong>24 hours</strong>.</p>
+      <div class="ref-badge" id="refBadge">REF# VB-000000</div>
+      <p class="email-note">Notification will be sent to <b id="successEmail">—</b></p>
+      <div class="success-actions">
+        <a href="/" class="btn-primary-full">← Back to Home</a>
+        <a href="/demo" class="btn-outline-full">🎙️ Try Voice Demo</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+let selectedPlan = '';
+let selectedPlanKey = '';
+
+function pickPlan(plan, key, card) {
+  selectedPlan = plan; selectedPlanKey = key;
+  document.getElementById('f-plan').value = plan;
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('sel'));
+  card.classList.add('sel');
+  hideErr('e-plan'); updateProgress();
+}
+
+function updateProgress() {
+  const fields = [
+    document.getElementById('f-name').value.trim(),
+    document.getElementById('f-type').value,
+    document.getElementById('f-email').value.trim(),
+    document.getElementById('f-phone').value.trim(),
+    document.getElementById('f-city').value.trim(),
+    selectedPlan
+  ];
+  const filled = fields.filter(f => f).length;
+  for (let i = 1; i <= 6; i++)
+    document.getElementById('ps'+i).classList.toggle('done', i <= filled);
+}
+
+function v(id) { return (document.getElementById(id)?.value||'').trim(); }
+function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+  document.getElementById(id.replace('e-','f-'))?.classList.add('error');
+}
+function hideErr(id) {
+  document.getElementById(id)?.classList.remove('show');
+  document.getElementById(id.replace('e-','f-'))?.classList.remove('error');
+}
+function clearAllErrors() {
+  ['e-name','e-type','e-email','e-phone','e-city','e-plan'].forEach(hideErr);
+}
+
+async function submitForm() {
+  clearAllErrors();
+  let valid = true;
+  const name=v('f-name'), type=v('f-type'), email=v('f-email'),
+        phone=v('f-phone'), city=v('f-city'), plan=v('f-plan');
+
+  if (!name)             { showErr('e-name',  'Please enter your business name'); valid=false; }
+  if (!type)             { showErr('e-type',  'Please select a business type'); valid=false; }
+  if (!email)            { showErr('e-email', 'Please enter your email'); valid=false; }
+  else if (!isEmail(email)){ showErr('e-email','Please enter a valid email address'); valid=false; }
+  if (!phone)            { showErr('e-phone', 'Please enter your phone number'); valid=false; }
+  if (!city)             { showErr('e-city',  'Please enter your city'); valid=false; }
+  if (!plan)             { showErr('e-plan',  'Please choose a plan to continue'); valid=false; }
+
+  if (!valid) {
+    showToast('⚠️ Please fill in all required fields', 'error');
+    document.querySelector('.err-msg.show')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" style="stroke:white;fill:none;stroke-width:2;animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Submitting…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/registrations', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, type, email, phone, city, plan, owner: name })
+    });
+    const data = await res.json();
+
+    // Show success
+    document.getElementById('refBadge').textContent = 'REF# ' + (data.ref_id || 'VB-000000');
+    document.getElementById('successEmail').textContent = email;
+    if (selectedPlanKey === 'new') {
+      document.getElementById('successMsg').innerHTML =
+        'Your application has been received. Since you chose <strong>New Website</strong>, once approved we\'ll set up your VoiceBill account and send login credentials to your email within <strong>24 hours</strong>.';
+    } else {
+      document.getElementById('successMsg').innerHTML =
+        'Your application has been received. Our team will <strong>contact you within 24 hours</strong> to discuss next steps for your <strong>' + selectedPlan + '</strong> plan.';
+    }
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('successView').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+    showToast('🎉 Registration submitted!', 'success');
+  } catch(e) {
+    showToast('Something went wrong. Please try again.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Submit Registration';
+  }
+}
+
+// Pre-select plan from URL param
+window.addEventListener('DOMContentLoaded', () => {
+  const urlPlan = new URLSearchParams(window.location.search).get('plan');
+  if (urlPlan) {
+    const map = {
+      payg: ['Pay As You Go','payg','pc-payg'],
+      oti:  ['One Time Integration','oti','pc-oti'],
+      new:  ['Create New Website','new','pc-new']
+    };
+    if (map[urlPlan]) {
+      const [name, key, id] = map[urlPlan];
+      pickPlan(name, key, document.getElementById(id));
+    }
+  }
+});
+
+let _tt;
+function showToast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.className='toast show '+type;
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3200);
+}
+</script>
+</body>
+</html>

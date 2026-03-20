@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Time Integration – VoiceBill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#0ea5a0; --teal2:#0891b2; --teal-dark:#087c78;
+  --teal-lt:rgba(14,165,160,.09); --teal-bd:rgba(14,165,160,.25);
+  --blue:#3b82f6; --indigo:#6366f1;
+  --green:#16a34a; --green-bg:#dcfce7; --green-bd:#86efac;
+  --amber:#d97706; --amber-bg:#fef3c7;
+  --red:#dc2626;
+  --bg:#f0fafa; --white:#ffffff; --surf:#f7fefe;
+  --text:#0d2626; --muted:#4d7070; --border:#cde8e8; --border2:#a8d5d3;
+  --grad:linear-gradient(135deg,#0ea5a0,#3b82f6);
+  --grad-ind:linear-gradient(135deg,#0ea5a0,#6366f1);
+  --grad-soft:linear-gradient(135deg,#e0f7f7 0%,#eef2ff 100%);
+  --sh-sm:0 2px 8px rgba(14,165,160,.08);
+  --sh-md:0 8px 32px rgba(14,165,160,.13);
+  --fh:'Sora',sans-serif; --fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{height:64px;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;box-shadow:var(--sh-sm)}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--fh);font-weight:800;font-size:1.18rem;color:var(--teal-dark);text-decoration:none;letter-spacing:-.02em}
+.logo-box{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-box svg{width:20px;height:20px;fill:white}
+.back-btn{display:flex;align-items:center;gap:6px;padding:.36rem .9rem;border:1.5px solid var(--border2);border-radius:9px;color:var(--muted);font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s}
+.back-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-lt)}
+.back-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* HERO */
+.hero{background:linear-gradient(145deg,#0f1535 0%,#0a2a35 55%,#0a1f30 100%);padding:5rem 5% 0;position:relative;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.b1{width:440px;height:440px;background:rgba(99,102,241,.18);top:-100px;right:-60px}
+.b2{width:300px;height:300px;background:rgba(14,165,160,.15);bottom:0;left:-50px}
+.b3{width:200px;height:200px;background:rgba(59,130,246,.12);top:40%;right:22%}
+.hero-inner{max-width:920px;margin:0 auto;position:relative;z-index:2}
+.oti-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:50px;padding:.35rem 1rem;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.4rem}
+.hero h1{font-family:var(--fh);font-size:clamp(2rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.12;letter-spacing:-.03em;margin-bottom:1rem}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#14d9d3,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.05rem;color:rgba(255,255,255,.62);line-height:1.75;max-width:580px;margin-bottom:2rem}
+.price-block{display:inline-flex;align-items:baseline;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:1.1rem 1.6rem;margin-bottom:.8rem}
+.currency{font-family:var(--fh);font-size:1.3rem;font-weight:700;color:rgba(255,255,255,.65)}
+.amount{font-family:var(--fh);font-size:3rem;font-weight:900;color:#fff;line-height:1}
+.period{font-size:.88rem;color:rgba(255,255,255,.5);font-weight:500}
+.price-note{font-size:.82rem;color:rgba(255,255,255,.42);margin-bottom:2rem}
+.price-note b{color:#a5b4fc}
+.hero-cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn-start{display:inline-flex;align-items:center;gap:8px;background:var(--grad-ind);color:#fff;border:none;border-radius:12px;padding:.9rem 2rem;font-family:var(--fh);font-weight:800;font-size:.98rem;cursor:pointer;transition:all .22s;letter-spacing:.01em;box-shadow:0 6px 22px rgba(99,102,241,.4);text-decoration:none}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(99,102,241,.5)}
+.btn-start svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2.5}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;color:rgba(255,255,255,.65);font-size:.9rem;font-weight:600;text-decoration:none;transition:color .2s}
+.btn-ghost:hover{color:#fff}
+.process-strip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:1.3rem 1.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.ps-step{display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;position:relative}
+.ps-step:not(:last-child)::after{content:'→';position:absolute;right:-1rem;top:.9rem;color:rgba(255,255,255,.3);font-size:.9rem}
+.ps-num{width:32px;height:32px;border-radius:50%;background:var(--grad-ind);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.75rem;font-weight:800;color:#fff}
+.ps-label{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.7);line-height:1.3}
+
+/* MAIN */
+.main{max-width:1060px;margin:0 auto;padding:4rem 5%}
+.sec-tag{display:inline-block;background:var(--teal-lt);border:1px solid var(--teal-bd);color:var(--teal-dark);border-radius:50px;padding:.28rem .9rem;font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.7rem}
+.sec-title{font-family:var(--fh);font-size:clamp(1.5rem,3vw,2rem);font-weight:800;letter-spacing:-.025em;margin-bottom:.6rem}
+.sec-sub{color:var(--muted);font-size:.97rem;line-height:1.7;max-width:560px}
+
+/* STEPS */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.5rem}
+.step-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.5rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s}
+.step-card:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--teal-bd)}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-ind)}
+.step-num{font-family:var(--fh);font-size:2.8rem;font-weight:900;color:rgba(14,165,160,.1);line-height:1;margin-bottom:.5rem}
+.step-icon{font-size:1.4rem;margin-bottom:.6rem}
+.step-card h3{font-family:var(--fh);font-size:.9rem;font-weight:700;margin-bottom:.4rem}
+.step-card p{font-size:.82rem;color:var(--muted);line-height:1.6}
+
+/* INTEGRATE */
+.integrate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.int-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.5rem;transition:all .2s}
+.int-card:hover{border-color:var(--teal-bd);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.int-icon{width:48px;height:48px;border-radius:13px;background:var(--grad-soft);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;border:1px solid var(--border)}
+.int-card h3{font-family:var(--fh);font-size:.92rem;font-weight:700;margin-bottom:.35rem}
+.int-card p{font-size:.83rem;color:var(--muted);line-height:1.6}
+
+/* INCLUDED */
+.included-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2.5rem}
+.inc-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.6rem}
+.inc-head{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem}
+.inc-cat{font-family:var(--fh);font-size:.82rem;font-weight:800;color:var(--teal-dark);text-transform:uppercase;letter-spacing:.06em}
+.inc-list{display:flex;flex-direction:column;gap:.55rem}
+.inc-item{display:flex;align-items:flex-start;gap:10px;font-size:.88rem;color:var(--text)}
+.inc-item svg{width:16px;height:16px;stroke:var(--teal);fill:none;stroke-width:2.5;flex-shrink:0;margin-top:2px}
+.itag{font-size:.68rem;background:rgba(99,102,241,.1);color:var(--indigo);border-radius:4px;padding:.1rem .45rem;font-weight:700;margin-left:4px;border:1px solid rgba(99,102,241,.2)}
+
+/* PRICING TIERS */
+.pricing-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.pc{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.5rem;text-align:center;transition:all .2s}
+.pc:hover{border-color:var(--teal-bd);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.pc.hl{background:linear-gradient(145deg,#0f1535,#0a2a35);border-color:rgba(99,102,241,.4)}
+.pc-badge{display:inline-block;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.35);color:#a5b4fc;border-radius:6px;padding:.2rem .65rem;font-size:.68rem;font-weight:700;margin-bottom:.6rem}
+.pc-icon{font-size:1.6rem;margin-bottom:.6rem}
+.pc-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem}
+.pc.hl .pc-label{color:rgba(255,255,255,.5)}
+.pc-name{font-family:var(--fh);font-size:1rem;font-weight:800;color:var(--text);margin-bottom:.4rem}
+.pc.hl .pc-name{color:#fff}
+.pc-price{font-family:var(--fh);font-size:1.8rem;font-weight:900;color:var(--text);margin-bottom:.3rem}
+.pc.hl .pc-price{color:#fff}
+.pc-desc{font-size:.8rem;color:var(--muted);line-height:1.55}
+.pc.hl .pc-desc{color:rgba(255,255,255,.55)}
+
+/* COMPARISON */
+.comp-table{width:100%;border-collapse:collapse;margin-top:2.5rem;background:var(--white);border-radius:18px;overflow:hidden;border:1.5px solid var(--border);box-shadow:var(--sh-sm)}
+.comp-table th{background:var(--surf);padding:1rem 1.2rem;text-align:left;font-family:var(--fh);font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--border)}
+.comp-table th.hl{background:linear-gradient(135deg,rgba(14,165,160,.08),rgba(99,102,241,.06));color:var(--teal-dark)}
+.comp-table td{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);font-size:.88rem}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:hover td{background:var(--surf)}
+.yes{color:var(--green);font-size:1rem}
+.no{color:#b0cccc;font-size:1rem}
+.hl-cell{background:rgba(14,165,160,.04);font-weight:600;color:var(--teal-dark)}
+
+/* TECH */
+.tech-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.tech-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:1.2rem;text-align:center;transition:all .2s}
+.tech-card:hover{border-color:var(--teal-bd);box-shadow:var(--sh-sm)}
+.tech-icon{font-size:1.6rem;margin-bottom:.5rem}
+.tech-name{font-family:var(--fh);font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+.tech-desc{font-size:.72rem;color:var(--muted)}
+
+/* FAQ */
+.faq-list{margin-top:2rem;display:flex;flex-direction:column;gap:.7rem}
+.faq-item{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem;cursor:pointer;font-family:var(--fh);font-size:.92rem;font-weight:700;color:var(--text);transition:background .2s}
+.faq-q:hover{background:var(--surf)}
+.faq-q svg{width:18px;height:18px;stroke:var(--teal);fill:none;stroke-width:2.5;transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-q svg{transform:rotate(45deg)}
+.faq-a{display:none;padding:.9rem 1.3rem 1.1rem;font-size:.88rem;color:var(--muted);line-height:1.7;border-top:1px solid var(--border)}
+.faq-item.open .faq-a{display:block}
+
+/* QUOTE FORM */
+.quote-wrap{background:var(--white);border:1.5px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:var(--sh-md);display:grid;grid-template-columns:1fr 1.2fr;margin-top:2rem}
+.quote-left{background:linear-gradient(145deg,#0f1535,#0a2a35);padding:2.5rem 2rem;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.ql-blob{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+.ql1{width:220px;height:220px;background:rgba(99,102,241,.2);top:-60px;right:-40px}
+.ql2{width:160px;height:160px;background:rgba(14,165,160,.15);bottom:-40px;left:-30px}
+.quote-left h3{font-family:var(--fh);font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:.7rem;line-height:1.25;position:relative}
+.quote-left p{color:rgba(255,255,255,.6);font-size:.88rem;line-height:1.7;margin-bottom:1.5rem;position:relative}
+.quote-perks{display:flex;flex-direction:column;gap:.65rem;position:relative}
+.qp{display:flex;align-items:flex-start;gap:10px;font-size:.84rem;color:rgba(255,255,255,.75)}
+.qp svg{width:16px;height:16px;stroke:#14d9d3;fill:none;stroke-width:2.5;flex-shrink:0;margin-top:2px}
+.quote-right{padding:2.5rem 2rem}
+.quote-right h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;margin-bottom:.4rem}
+.quote-right p{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem}
+.q-field{display:flex;flex-direction:column;gap:.32rem}
+.q-field label{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.q-field input,.q-field select,.q-field textarea{padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:10px;font-family:var(--fb);font-size:.86rem;color:var(--text);background:var(--surf);outline:none;transition:border-color .2s,box-shadow .2s}
+.q-field input:focus,.q-field select:focus,.q-field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt)}
+.q-field input::placeholder,.q-field textarea::placeholder{color:#b0cccc}
+.q-field textarea{resize:none;height:80px}
+.q-field.full{grid-column:1/-1}
+.btn-quote{width:100%;padding:.85rem;border:none;border-radius:12px;background:var(--grad-ind);color:#fff;font-family:var(--fh);font-weight:800;font-size:.92rem;cursor:pointer;transition:all .22s;box-shadow:0 4px 16px rgba(99,102,241,.35);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:.5rem}
+.btn-quote:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,.45)}
+.btn-quote:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-quote svg{width:16px;height:16px;stroke:white;fill:none;stroke-width:2.5}
+.quote-success{display:none;text-align:center;padding:2rem 1rem}
+.quote-success.show{display:block}
+.qs-icon{font-size:3rem;margin-bottom:.8rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.quote-success h3{font-family:var(--fh);font-size:1.2rem;font-weight:800;margin-bottom:.5rem}
+.quote-success p{font-size:.88rem;color:var(--muted);line-height:1.6}
+
+/* CTA */
+.cta-section{margin-top:5rem;background:linear-gradient(135deg,#0f1535,#0a2a35);border-radius:24px;padding:4rem 3rem;text-align:center;position:relative;overflow:hidden}
+.cta-blob{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
+.cb1{width:320px;height:320px;background:rgba(99,102,241,.2);top:-80px;right:-60px}
+.cb2{width:220px;height:220px;background:rgba(14,165,160,.15);bottom:-60px;left:-40px}
+.cta-section h2{font-family:var(--fh);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;color:#fff;margin-bottom:.8rem;letter-spacing:-.02em;position:relative}
+.cta-section > p{color:rgba(255,255,255,.6);font-size:.97rem;max-width:480px;margin:0 auto 2rem;line-height:1.7;position:relative}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;position:relative}
+.btn-cta-main{display:inline-flex;align-items:center;gap:8px;background:var(--grad-ind);color:#fff;border:none;border-radius:12px;padding:.9rem 2rem;font-family:var(--fh);font-weight:800;font-size:.95rem;cursor:pointer;transition:all .22s;box-shadow:0 6px 20px rgba(99,102,241,.4);text-decoration:none}
+.btn-cta-main:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(99,102,241,.5)}
+.btn-cta-sec{display:inline-block;padding:.88rem 1.8rem;border:2px solid rgba(255,255,255,.25);color:rgba(255,255,255,.8);border-radius:12px;font-family:var(--fh);font-weight:700;font-size:.9rem;text-decoration:none;transition:all .2s}
+.btn-cta-sec:hover{border-color:rgba(255,255,255,.6);color:#fff}
+.guarantee{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:1.2rem;color:rgba(255,255,255,.4);font-size:.78rem}
+.guarantee svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:.6rem 1.3rem;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  .steps-grid{grid-template-columns:repeat(2,1fr)}
+  .integrate-grid{grid-template-columns:1fr 1fr}
+  .included-grid{grid-template-columns:1fr}
+  .pricing-cards{grid-template-columns:1fr}
+  .tech-grid{grid-template-columns:repeat(2,1fr)}
+  .quote-wrap{grid-template-columns:1fr}
+  .process-strip{grid-template-columns:repeat(2,1fr)}
+  .ps-step:nth-child(2)::after{display:none}
+}
+@media(max-width:560px){
+  .steps-grid{grid-template-columns:1fr}
+  .integrate-grid{grid-template-columns:1fr}
+  .q-grid{grid-template-columns:1fr}
+  .hero{padding:3.5rem 5% 0}
+  .main{padding:3rem 5%}
+  .cta-section{padding:2.5rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a href="/" class="logo">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zm0 0"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3M8 22h8" stroke="white" stroke-width="1.8" fill="none"/></svg>
+    </div>
+    VoiceBill
+  </a>
+  <a href="/register" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="hero-inner">
+    <div class="oti-badge">⚡ One-Time Payment — No Monthly Fees Ever</div>
+    <h1>One Time<br><em>Integration.</em><br>Your Site. Our Engine.</h1>
+    <p class="hero-sub">Already have a restaurant website? We plug VoiceBill's complete voice ordering and billing system directly into it — one payment, yours forever.</p>
+    <div class="price-block">
+      <span class="currency">₹</span>
+      <span class="amount">24,999</span>
+      <span class="period">&nbsp;one-time</span>
+    </div>
+    <p class="price-note">Full source code delivered. <b>No recurring fees. No subscriptions. Ever.</b></p>
+    <div class="hero-cta">
+      <a href="#quote" class="btn-start">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Get a Free Quote
+      </a>
+      <a href="/demo" class="btn-ghost">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        See Live Demo
+      </a>
+    </div>
+    <div class="process-strip">
+      <div class="ps-step"><div class="ps-num">1</div><div class="ps-label">Submit quote request</div></div>
+      <div class="ps-step"><div class="ps-num">2</div><div class="ps-label">Team reviews your site</div></div>
+      <div class="ps-step"><div class="ps-num">3</div><div class="ps-label">Integration built & tested</div></div>
+      <div class="ps-step"><div class="ps-num">4</div><div class="ps-label">Go live in 5–7 days</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="main">
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <span class="sec-tag">The Process</span>
+    <h2 class="sec-title">From your site to voice-enabled in 5–7 days</h2>
+    <p class="sec-sub">Our team handles everything. You share access, we integrate — no technical knowledge needed from your side.</p>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">01</div><div class="step-icon">📋</div><h3>Submit Your Quote</h3><p>Fill in the quote form with your website URL and requirements. We respond within 24 hours with a full scope.</p></div>
+      <div class="step-card"><div class="step-num">02</div><div class="step-icon">🔍</div><h3>Site Audit & Scope</h3><p>Our team reviews your site — tech stack, design, menu — and sends a precise integration plan and cost.</p></div>
+      <div class="step-card"><div class="step-num">03</div><div class="step-icon">⚙️</div><h3>Build & Integration</h3><p>We integrate voice ordering, kitchen dashboard, auto-billing, and all custom features into your live site.</p></div>
+      <div class="step-card"><div class="step-num">04</div><div class="step-icon">🚀</div><h3>Test & Go Live</h3><p>Full QA across devices, staff training included. You go live with confidence and get the full source code.</p></div>
+    </div>
+  </section>
+
+  <!-- WHAT WE INTEGRATE -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">What We Add</span>
+    <h2 class="sec-title">Powerful modules added to your existing site</h2>
+    <p class="sec-sub">We don't rebuild your website. We add these voice and billing modules directly into what you already have.</p>
+    <div class="integrate-grid">
+      <div class="int-card"><div class="int-icon">🎙️</div><h3>Voice Ordering Module</h3><p>A floating mic button customers tap to speak their order. Powered by Claude AI — understands natural language and your menu.</p></div>
+      <div class="int-card"><div class="int-icon">🧾</div><h3>Auto Billing Engine</h3><p>Bills generated the moment an order is confirmed. GST split automatically. Downloadable PDF receipts for customers.</p></div>
+      <div class="int-card"><div class="int-icon">👨‍🍳</div><h3>Kitchen Display Panel</h3><p>A real-time KDS your kitchen staff access from any device — all active orders with status and priority tracking.</p></div>
+      <div class="int-card"><div class="int-icon">📊</div><h3>Admin Dashboard</h3><p>A behind-the-scenes panel for owners — all orders, bills, analytics, and menu management in one place.</p></div>
+      <div class="int-card"><div class="int-icon">🎨</div><h3>Custom Feature Integration</h3><p>Table reservations, loyalty points, custom payment flows — we scope and build exactly what your restaurant needs.</p></div>
+      <div class="int-card"><div class="int-icon">📱</div><h3>Full Responsiveness</h3><p>Every feature works perfectly on mobile, tablet, and desktop — matching your existing site's design and theme.</p></div>
+    </div>
+  </section>
+
+  <!-- INCLUDED -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">Deliverables</span>
+    <h2 class="sec-title">Everything you receive — once, forever</h2>
+    <p class="sec-sub">One payment. No hidden extras. Here's the exact list of what gets delivered.</p>
+    <div class="included-grid">
+      <div class="inc-card">
+        <div class="inc-head"><div style="font-size:1.3rem">📦</div><div class="inc-cat">Code & Delivery</div></div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Complete source code via GitHub</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full ownership — no licensing fees ever</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Deployed on your existing hosting</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Staging + production environment setup</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full technical documentation</div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head"><div style="font-size:1.3rem">🎙️</div><div class="inc-cat">Voice & Ordering</div></div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Voice ordering (Claude AI powered)</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Manual order entry fallback</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Menu management panel</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Multi-table order management</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom features <span class="itag">Quoted</span></div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head"><div style="font-size:1.3rem">🧾</div><div class="inc-cat">Billing & Analytics</div></div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Auto GST billing (CGST + SGST)</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>PDF & PNG bill downloads</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Order history with search</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Daily sales dashboard</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Revenue analytics reports</div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head"><div style="font-size:1.3rem">🤝</div><div class="inc-cat">Support & Training</div></div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated project manager</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Staff training session (video call)</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>30-day post-launch bug support</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Email support for 90 days</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support first 30 days</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TIERS -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">Pricing</span>
+    <h2 class="sec-title">Transparent one-time pricing</h2>
+    <p class="sec-sub">Pricing depends on your existing site's complexity. Here's what most integrations cost.</p>
+    <div class="pricing-cards">
+      <div class="pc">
+        <div class="pc-icon">🌱</div>
+        <div class="pc-label">Basic</div>
+        <div class="pc-name">Simple Site</div>
+        <div class="pc-price">₹14,999</div>
+        <div class="pc-desc">Static or simple HTML site. Core voice ordering + billing. Delivery in 3–4 days.</div>
+      </div>
+      <div class="pc hl">
+        <div class="pc-badge">MOST COMMON</div>
+        <div class="pc-icon">⚡</div>
+        <div class="pc-label">Standard</div>
+        <div class="pc-name">Dynamic Site</div>
+        <div class="pc-price">₹24,999</div>
+        <div class="pc-desc">WordPress, Webflow, or custom-built site. Full feature set + custom integrations. Delivery in 5–7 days.</div>
+      </div>
+      <div class="pc">
+        <div class="pc-icon">🏢</div>
+        <div class="pc-label">Enterprise</div>
+        <div class="pc-name">Complex / Multi-outlet</div>
+        <div class="pc-price">Custom</div>
+        <div class="pc-desc">Large chains, POS integration, multi-branch support. Scoped per project.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">Compare Plans</span>
+    <h2 class="sec-title">One Time vs other VoiceBill plans</h2>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th style="width:35%">Feature</th>
+          <th>📅 Pay As You Go</th>
+          <th class="hl">⚡ One Time Integration</th>
+          <th>🌐 New Website</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Voice ordering</td><td><span class="yes">✓</span></td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Auto billing</td><td><span class="yes">✓</span></td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Works on existing site</td><td><span class="no">—</span></td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="no">—</span></td></tr>
+        <tr><td>Monthly fee</td><td>₹1,499/mo</td><td class="hl-cell"><strong>None — ever</strong></td><td>None</td></tr>
+        <tr><td>Source code ownership</td><td><span class="no">—</span></td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Custom features</td><td><span class="no">—</span></td><td class="hl-cell"><span class="yes">✓</span> Quoted</td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Delivery time</td><td>Instant</td><td class="hl-cell">5–7 days</td><td>2–3 weeks</td></tr>
+        <tr><td>30-day bug support</td><td><span class="no">—</span></td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Best for</td><td>Growing restaurants</td><td class="hl-cell"><strong>Sites that already exist</strong></td><td>Starting fresh</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TECH STACK -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">Tech Stack</span>
+    <h2 class="sec-title">We work with your platform</h2>
+    <p class="sec-sub">We integrate with most popular website platforms and custom-built sites. Not sure if yours qualifies? Ask us.</p>
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-icon">🌐</div><div class="tech-name">WordPress</div><div class="tech-desc">Including WooCommerce</div></div>
+      <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">Webflow</div><div class="tech-desc">Via custom code embed</div></div>
+      <div class="tech-card"><div class="tech-icon">⚛️</div><div class="tech-name">React / Next.js</div><div class="tech-desc">Full component integration</div></div>
+      <div class="tech-card"><div class="tech-icon">🖥️</div><div class="tech-name">Custom HTML/CSS</div><div class="tech-desc">Any static or dynamic site</div></div>
+      <div class="tech-card"><div class="tech-icon">🛒</div><div class="tech-name">Shopify</div><div class="tech-desc">Food & beverage stores</div></div>
+      <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">Wix / Squarespace</div><div class="tech-desc">Via embed & API hooks</div></div>
+      <div class="tech-card"><div class="tech-icon">🐍</div><div class="tech-name">Django / Flask</div><div class="tech-desc">Python backend support</div></div>
+      <div class="tech-card"><div class="tech-icon">💎</div><div class="tech-name">Laravel / PHP</div><div class="tech-desc">Full backend integration</div></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">FAQ</span>
+    <h2 class="sec-title">Common questions</h2>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do I really own the code with no recurring fees?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Yes, completely. After the one-time payment the integrated code is yours with full ownership. There are no licensing fees, no subscriptions, and no revenue sharing. The only optional ongoing cost is if you choose to use the Claude AI voice parsing API, which has its own free tier covering most small restaurants.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How long does the integration take?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Most standard integrations are done in 5–7 business days. Simple HTML sites take 3–4 days. Complex or multi-outlet projects may take 2–3 weeks. Your project manager will give an exact timeline after reviewing your site.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Will it change my site's design?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">No. We match your existing design — colours, fonts, layout. The voice ordering button and billing panels blend into your site. We can also deliver features as a separate admin panel if you prefer the customer-facing site unchanged.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What if I need changes after delivery?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">You get 30 days of free bug-fix support and 90 days of email support after delivery. For new features after that, we can quote per-project or offer a maintenance retainer. Since you own the code, any developer can also make changes.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do I need to provide server access?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">For platforms like WordPress or Webflow, we just need editor or admin access. For custom-built sites, temporary SSH or FTP access is needed during integration. All access is revoked once the project is complete.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I switch to the monthly plan later?<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="faq-a">Yes. If you later want automatic updates and managed hosting through VoiceBill, you can switch to Pay As You Go at any time. Your integration work will be migrated at no extra cost.</div></div>
+    </div>
+  </section>
+
+  <!-- QUOTE FORM -->
+  <section id="quote" style="margin-top:5rem">
+    <span class="sec-tag">Get Started</span>
+    <h2 class="sec-title">Request a free integration quote</h2>
+    <p class="sec-sub">Tell us about your site and we'll get back within 24 hours with a detailed scope and exact pricing.</p>
+
+    <div class="quote-wrap">
+      <div class="quote-left">
+        <div class="ql-blob ql1"></div>
+        <div class="ql-blob ql2"></div>
+        <h3>Why restaurants choose One Time</h3>
+        <p>No ongoing costs. Full ownership. Seamlessly blends with your existing brand.</p>
+        <div class="quote-perks">
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Free quote — no obligation</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Response within 24 hours</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated project manager</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>30-day post-launch support</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full source code ownership</div>
+        </div>
+      </div>
+      <div class="quote-right">
+        <div id="quoteForm">
+          <h3>Tell us about your restaurant</h3>
+          <p>Fill in the details and we'll prepare a custom quote.</p>
+          <div class="q-grid">
+            <div class="q-field"><label>Restaurant Name <span style="color:var(--teal)">*</span></label><input type="text" id="q-name" placeholder="e.g. Spice Garden"></div>
+            <div class="q-field"><label>Your Name <span style="color:var(--teal)">*</span></label><input type="text" id="q-owner" placeholder="Owner / Manager name"></div>
+            <div class="q-field"><label>Email Address <span style="color:var(--teal)">*</span></label><input type="email" id="q-email" placeholder="owner@restaurant.com"></div>
+            <div class="q-field"><label>Phone Number <span style="color:var(--teal)">*</span></label><input type="tel" id="q-phone" placeholder="+91 98765 43210"></div>
+            <div class="q-field full"><label>Your Website URL <span style="color:var(--teal)">*</span></label><input type="url" id="q-url" placeholder="https://www.yourrestaurant.com"></div>
+            <div class="q-field">
+              <label>Website Platform</label>
+              <select id="q-platform">
+                <option value="">Not sure / Other</option>
+                <option>WordPress</option><option>Webflow</option><option>React / Next.js</option>
+                <option>Custom HTML</option><option>Wix</option><option>Squarespace</option>
+                <option>Shopify</option><option>Django / Flask</option><option>Laravel / PHP</option>
+              </select>
+            </div>
+            <div class="q-field">
+              <label>Budget Range</label>
+              <select id="q-budget">
+                <option value="">— Select —</option>
+                <option>Under ₹15,000</option><option>₹15,000 – ₹25,000</option>
+                <option>₹25,000 – ₹50,000</option><option>₹50,000+</option>
+              </select>
+            </div>
+            <div class="q-field full"><label>Features needed (optional)</label><textarea id="q-notes" placeholder="e.g. Voice ordering, table reservations, loyalty points, POS integration..."></textarea></div>
+          </div>
+          <button class="btn-quote" id="quoteBtn" onclick="submitQuote()">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Send Quote Request
+          </button>
+        </div>
+        <div class="quote-success" id="quoteSuccess">
+          <div class="qs-icon">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>We've received your details and will send a custom integration quote to <strong id="qs-email">your email</strong> within 24 hours. Our team may also call to understand your needs better.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM CTA -->
+<section class="cta-section">
+    <div class="cta-blob cb1"></div>
+    <div class="cta-blob cb2"></div>
+    <h2>Ready to automate your restaurant?</h2>
+    <p>Start your 14-day free trial today. No credit card, no contracts, no setup fees — just results.</p>
+    <div class="cta-btns">
+      <a href="/register?plan=payg" class="btn-cta-main">Start Free Trial →</a>
+      <a href="/demo" class="btn-cta-sec">🎙️ Try Voice Demo</a>
+    </div>
+    <p class="guarantee">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      14-day free trial &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No credit card required
+    </p>
+  </section>
+
+</div><!-- /main -->
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleFaq(el){const i=el.parentElement,o=i.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(x=>x.classList.remove('open'));if(!o)i.classList.add('open')}
+function v(id){return(document.getElementById(id)?.value||'').trim()}
+function isEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}
+function submitQuote(){
+  const name=v('q-name'),owner=v('q-owner'),email=v('q-email'),phone=v('q-phone'),url=v('q-url');
+  if(!name){showToast('⚠️ Please enter your restaurant name','error');return}
+  if(!owner){showToast('⚠️ Please enter your name','error');return}
+  if(!email||!isEmail(email)){showToast('⚠️ Please enter a valid email','error');return}
+  if(!phone){showToast('⚠️ Please enter your phone number','error');return}
+  if(!url){showToast('⚠️ Please enter your website URL','error');return}
+  const btn=document.getElementById('quoteBtn');
+  btn.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:white;fill:none;stroke-width:2;animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Sending…';
+  btn.disabled=true;
+  const q={id:'QT-'+Math.floor(100000+Math.random()*900000),name,owner,email,phone,url,platform:v('q-platform'),budget:v('q-budget'),notes:v('q-notes'),plan:'One Time Integration',submittedAt:new Date().toISOString(),status:'pending',credentials:null};
+  try{const e=JSON.parse(localStorage.getItem('voicebill_registrations')||'[]');e.push(q);localStorage.setItem('voicebill_registrations',JSON.stringify(e))}catch(e){}
+  setTimeout(()=>{document.getElementById('qs-email').textContent=email;document.getElementById('quoteForm').style.display='none';document.getElementById('quoteSuccess').classList.add('show');showToast('🎉 Quote request submitted!','success')},1000)
+}
+let _tt;
+function showToast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show '+type;clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),3200)}
+const s=document.createElement('style');s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(s);
+</script>
+</body>
+</html>
