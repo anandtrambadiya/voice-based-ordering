@@ -4,7 +4,7 @@ VoiceBill platform is generic ,voice automated business management system design
 Business owners get a powerful dashboard to add and manage menu,register staff profile, kitchen order voice based management in a real time and view complete revenue analytics-all voice automated and hands-free.
 
 The platform is available in three flexible plans:
-Pay As You Go-Operated on the VoiceBill platform
-One-Time Integration-Plug the system into existing setup with a single payment.
-New website on platform-Get a fully built,branded online presence powered by our system.
+1.Pay As You Go-Operated on the VoiceBill platform
+2.One-Time Integration-Plug the system into existing setup with a single payment.
+3.New website on platform-Get a fully built,branded online presence powered by our system.
 
