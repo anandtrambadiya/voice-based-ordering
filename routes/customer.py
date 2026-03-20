@@ -22,10 +22,17 @@ def customer_order(table_no):
     # Set session so /api/menu works without login
     session['restaurant_id'] = restaurant.id
     session['user_id'] = None
+    from models import BUSINESS_LABELS
+    btype    = restaurant.business_type
+    DINE_IN  = ['restaurant','cafe']
+    biz_mode = 'dine_in' if btype in DINE_IN else 'direct'
     return render_template('order.html',
-        current_restaurant=restaurant,
-        customer_table=table_no,
-        customer_token=token
+        current_restaurant = restaurant,
+        customer_table     = table_no if biz_mode == 'dine_in' else None,
+        customer_token     = token,
+        is_customer        = True,
+        biz_mode           = biz_mode,
+        biz_labels         = restaurant.labels
     )
 
 
@@ -62,7 +69,10 @@ def customer_place_order():
     order.tax      = round(subtotal * 0.05, 2)
     order.total    = round(order.subtotal + order.tax, 2)
     db.session.commit()
-    return jsonify({'order_id': order.id, 'total': order.total}), 201
+    biz_name = restaurant.name if restaurant else ''
+    prefix   = ''.join(w[0] for w in biz_name.upper().split()[:3]) or 'ORD'
+    short_id = f'{prefix}-{order.id:04d}'
+    return jsonify({'order_id': order.id, 'total': order.total, 'short_id': short_id}), 201
 
 @customer_bp.route('/api/customer/qr-url')
 def qr_url():

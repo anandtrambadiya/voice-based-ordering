@@ -60,7 +60,7 @@ async function loadTables() {
   const grid = document.getElementById('tablesGrid');
   grid.innerHTML = '';
 
-  const tables = BIZ_MODE === 'dine_in' ? Array.from({length:10},(_,i)=>i+1) : [0];
+  const tables = BIZ_MODE === 'dine_in' ? Array.from({length:10},(_,i)=>i+1) : [1];
 
   for (let t of tables) {
     const res  = await fetch(`/api/customer/qr-url?table=${t}`);
@@ -70,7 +70,7 @@ async function loadTables() {
     const card = document.createElement('div');
     card.className = 'tcard';
     card.innerHTML = `
-      <div class="tcard-title">Table ${t}</div>
+      <div class="tcard-title">${BIZ_MODE === 'dine_in' ? 'Table ' + t : '{{ current_restaurant.name if current_restaurant else "Shop" }}'}</div>
       <div class="qr-box" id="qr-${t}"></div>
       <div class="tcard-url">${url}</div>
       <div class="tcard-actions">
@@ -89,12 +89,21 @@ async function loadTables() {
 }
 
 function copyUrl(url) {
-  navigator.clipboard.writeText(url);
-  showToast('URL copied!', 'success');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(()=>showToast('URL copied!','success'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = url; el.style.position='fixed'; el.style.opacity='0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('URL copied!', 'success');
+  }
 }
 
 function printQR(tableNo) {
-  const card = document.querySelectorAll('.tcard')[tableNo - 1];
+  const cards = document.querySelectorAll('.tcard');
+  const card  = BIZ_MODE === 'dine_in' ? cards[tableNo - 1] : cards[0];
   const win  = window.open('', '_blank');
   win.document.write(`
     <html><head><title>${BIZ_MODE === 'dine_in' ? 'Table ' + tableNo : 'Shop QR'}</title>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Website Plan – VoiceBill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#0ea5a0; --teal2:#0891b2; --teal-dark:#087c78;
+  --teal-lt:rgba(14,165,160,.09); --teal-bd:rgba(14,165,160,.25);
+  --blue:#3b82f6; --violet:#7c3aed; --violet2:#a78bfa;
+  --green:#16a34a; --green-bg:#dcfce7; --green-bd:#86efac;
+  --amber:#d97706; --amber-bg:#fef3c7;
+  --red:#dc2626;
+  --bg:#f0fafa; --white:#ffffff; --surf:#f7fefe;
+  --text:#0d2626; --muted:#4d7070; --border:#cde8e8; --border2:#a8d5d3;
+  --grad:linear-gradient(135deg,#0ea5a0,#3b82f6);
+  --grad-vio:linear-gradient(135deg,#7c3aed,#0ea5a0);
+  --grad-soft:linear-gradient(135deg,#f3eeff 0%,#e0f7f7 100%);
+  --sh-sm:0 2px 8px rgba(14,165,160,.08);
+  --sh-md:0 8px 32px rgba(14,165,160,.13);
+  --sh-lg:0 20px 60px rgba(14,165,160,.18);
+  --fh:'Sora',sans-serif; --fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{height:64px;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;box-shadow:var(--sh-sm)}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--fh);font-weight:800;font-size:1.18rem;color:var(--teal-dark);text-decoration:none;letter-spacing:-.02em}
+.logo-box{width:36px;height:36px;background:var(--grad);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-box svg{width:20px;height:20px;fill:white}
+.back-btn{display:flex;align-items:center;gap:6px;padding:.36rem .9rem;border:1.5px solid var(--border2);border-radius:9px;color:var(--muted);font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s}
+.back-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-lt)}
+.back-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(145deg,#120a2e 0%,#0a1f35 55%,#0f1a30 100%);padding:5rem 5% 0;position:relative;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.b1{width:460px;height:460px;background:rgba(124,58,237,.2);top:-120px;right:-60px}
+.b2{width:320px;height:320px;background:rgba(14,165,160,.15);bottom:0;left:-50px}
+.b3{width:220px;height:220px;background:rgba(59,130,246,.1);top:35%;right:25%}
+.hero-inner{max-width:920px;margin:0 auto;position:relative;z-index:2}
+
+.nw-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;border-radius:50px;padding:.35rem 1rem;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.4rem}
+.nw-badge span{width:7px;height:7px;border-radius:50%;background:#c4b5fd;animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero h1{font-family:var(--fh);font-size:clamp(2rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.12;letter-spacing:-.03em;margin-bottom:1rem}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#c4b5fd,#14d9d3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.05rem;color:rgba(255,255,255,.62);line-height:1.75;max-width:580px;margin-bottom:2rem}
+
+.price-block{display:inline-flex;align-items:baseline;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:1.1rem 1.6rem;margin-bottom:.8rem}
+.currency{font-family:var(--fh);font-size:1.3rem;font-weight:700;color:rgba(255,255,255,.65)}
+.amount{font-family:var(--fh);font-size:3rem;font-weight:900;color:#fff;line-height:1}
+.period{font-size:.88rem;color:rgba(255,255,255,.5);font-weight:500}
+.price-note{font-size:.82rem;color:rgba(255,255,255,.42);margin-bottom:2rem}
+.price-note b{color:#c4b5fd}
+
+.hero-cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn-start{display:inline-flex;align-items:center;gap:8px;background:var(--grad-vio);color:#fff;border:none;border-radius:12px;padding:.9rem 2rem;font-family:var(--fh);font-weight:800;font-size:.98rem;cursor:pointer;transition:all .22s;letter-spacing:.01em;box-shadow:0 6px 22px rgba(124,58,237,.4);text-decoration:none}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(124,58,237,.5)}
+.btn-start svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2.5}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;color:rgba(255,255,255,.65);font-size:.9rem;font-weight:600;text-decoration:none;transition:color .2s}
+.btn-ghost:hover{color:#fff}
+.btn-ghost svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* process strip */
+.process-strip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:1.3rem 1.5rem;display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}
+.ps-step{display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;position:relative}
+.ps-step:not(:last-child)::after{content:'→';position:absolute;right:-1rem;top:.9rem;color:rgba(255,255,255,.3);font-size:.9rem}
+.ps-num{width:32px;height:32px;border-radius:50%;background:var(--grad-vio);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.75rem;font-weight:800;color:#fff}
+.ps-label{font-size:.74rem;font-weight:600;color:rgba(255,255,255,.7);line-height:1.3}
+
+/* ── MAIN ── */
+.main{max-width:1060px;margin:0 auto;padding:4rem 5%}
+.sec-tag{display:inline-block;background:var(--teal-lt);border:1px solid var(--teal-bd);color:var(--teal-dark);border-radius:50px;padding:.28rem .9rem;font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.7rem}
+.sec-title{font-family:var(--fh);font-size:clamp(1.5rem,3vw,2rem);font-weight:800;letter-spacing:-.025em;margin-bottom:.6rem}
+.sec-sub{color:var(--muted);font-size:.97rem;line-height:1.7;max-width:560px}
+
+/* ── WHAT YOU GET ── */
+.what-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.what-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.5rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s}
+.what-card:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--teal-bd)}
+.what-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-vio)}
+.what-icon{width:48px;height:48px;border-radius:13px;background:var(--grad-soft);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;border:1px solid var(--border)}
+.what-card h3{font-family:var(--fh);font-size:.92rem;font-weight:700;margin-bottom:.35rem}
+.what-card p{font-size:.83rem;color:var(--muted);line-height:1.6}
+.what-badge{font-size:.66rem;background:rgba(124,58,237,.1);color:var(--violet);border-radius:4px;padding:.1rem .45rem;font-weight:700;margin-left:6px;border:1px solid rgba(124,58,237,.2)}
+
+/* ── TECH STACK ── */
+.stack-section{margin-top:5rem}
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.stack-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:1.3rem;text-align:center;transition:all .2s}
+.stack-card:hover{border-color:var(--teal-bd);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.stack-emoji{font-size:2rem;margin-bottom:.6rem}
+.stack-card h4{font-family:var(--fh);font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+.stack-card p{font-size:.77rem;color:var(--muted);line-height:1.5}
+
+/* ── INCLUDED ── */
+.included-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2.5rem}
+.inc-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.6rem}
+.inc-head{display:flex;align-items:center;gap:10px;margin-bottom:1.1rem}
+.inc-cat{font-family:var(--fh);font-size:.82rem;font-weight:800;color:var(--teal-dark);text-transform:uppercase;letter-spacing:.06em}
+.inc-list{display:flex;flex-direction:column;gap:.55rem}
+.inc-item{display:flex;align-items:flex-start;gap:10px;font-size:.88rem;color:var(--text)}
+.inc-item svg{width:16px;height:16px;stroke:var(--teal);fill:none;stroke-width:2.5;flex-shrink:0;margin-top:2px}
+.vtag{font-size:.67rem;background:rgba(124,58,237,.1);color:var(--violet);border-radius:4px;padding:.1rem .42rem;font-weight:700;margin-left:5px;border:1px solid rgba(124,58,237,.2)}
+
+/* ── PRICING TIERS ── */
+.pricing-section{margin-top:5rem}
+.pricing-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.pc{background:var(--white);border:1.5px solid var(--border);border-radius:18px;padding:1.6rem;text-align:center;transition:all .2s;position:relative}
+.pc:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--teal-bd)}
+.pc.featured{border-color:transparent;background:linear-gradient(white,white) padding-box, var(--grad-vio) border-box;box-shadow:var(--sh-md)}
+.pc-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad-vio);color:#fff;border-radius:50px;padding:.25rem .85rem;font-size:.7rem;font-weight:800;font-family:var(--fh);letter-spacing:.04em;white-space:nowrap}
+.pc-name{font-family:var(--fh);font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem}
+.pc-price{font-family:var(--fh);font-size:2.2rem;font-weight:900;color:var(--text);line-height:1;margin-bottom:.25rem}
+.pc-price sup{font-size:1rem;font-weight:700;vertical-align:top;margin-top:.4rem}
+.pc-sub{font-size:.8rem;color:var(--muted);margin-bottom:1.2rem}
+.pc-divider{height:1px;background:var(--border);margin:1rem 0}
+.pc-list{text-align:left;display:flex;flex-direction:column;gap:.5rem}
+.pc-item{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text)}
+.pc-item svg{width:15px;height:15px;stroke:var(--teal);fill:none;stroke-width:2.5;flex-shrink:0}
+.pc-item.no svg{stroke:#cbd5e1}
+.pc-item.no{color:var(--muted)}
+.pc-btn{width:100%;margin-top:1.3rem;padding:.7rem;border-radius:10px;border:none;font-family:var(--fh);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+.pc-btn-outline{background:transparent;border:1.5px solid var(--border2);color:var(--muted)}
+.pc-btn-outline:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-lt)}
+.pc-btn-fill{background:var(--grad-vio);color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.3)}
+.pc-btn-fill:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(124,58,237,.4)}
+
+/* ── COMPARISON TABLE ── */
+.comparison-section{margin-top:5rem}
+.comp-table{width:100%;border-collapse:collapse;margin-top:2.5rem;border-radius:16px;overflow:hidden;border:1.5px solid var(--border)}
+.comp-table thead{background:linear-gradient(135deg,#f3eeff,#e0f7f7)}
+.comp-table th{padding:1rem 1.2rem;text-align:center;font-family:var(--fh);font-size:.82rem;font-weight:800;color:var(--text);letter-spacing:.02em}
+.comp-table th:first-child{text-align:left}
+.comp-table th.hl{background:rgba(124,58,237,.08);color:var(--violet)}
+.comp-table td{padding:.85rem 1.2rem;border-top:1px solid var(--border);font-size:.85rem;color:var(--text);text-align:center}
+.comp-table td:first-child{text-align:left;font-weight:500}
+.comp-table tr:hover td{background:var(--surf)}
+.hl-cell{background:rgba(124,58,237,.04)}
+.yes{color:var(--green);font-weight:700}
+.no{color:#cbd5e1}
+
+/* ── TIMELINE ── */
+.timeline-section{margin-top:5rem}
+.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:2.5rem;position:relative}
+.timeline::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--teal),var(--violet));z-index:0}
+.tl-step{display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center;position:relative;z-index:1}
+.tl-dot{width:56px;height:56px;border-radius:50%;background:var(--white);border:2.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all .2s;box-shadow:var(--sh-sm)}
+.tl-step:hover .tl-dot{border-color:var(--violet);box-shadow:0 0 0 6px rgba(124,58,237,.1)}
+.tl-week{font-size:.68rem;font-weight:700;color:var(--violet);font-family:var(--fh);text-transform:uppercase;letter-spacing:.06em}
+.tl-label{font-size:.8rem;font-weight:600;color:var(--text);line-height:1.4}
+.tl-desc{font-size:.74rem;color:var(--muted);line-height:1.5}
+
+/* ── FAQ ── */
+.faq-section{margin-top:5rem}
+.faq-list{display:flex;flex-direction:column;gap:.7rem;margin-top:2rem}
+.faq-item{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--teal-bd)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.3rem;cursor:pointer;font-weight:600;font-size:.92rem;color:var(--text);gap:1rem}
+.faq-q svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0;transition:transform .3s}
+.faq-item.open .faq-q svg{transform:rotate(45deg);stroke:var(--teal)}
+.faq-a{display:none;padding:0 1.3rem 1rem;font-size:.88rem;color:var(--muted);line-height:1.7}
+.faq-item.open .faq-a{display:block}
+
+/* ── QUOTE FORM ── */
+.quote-section{margin-top:5rem}
+.quote-wrap{display:grid;grid-template-columns:1fr 1.4fr;gap:2rem;margin-top:2.5rem;align-items:start}
+.quote-left{background:var(--grad-vio);border-radius:20px;padding:2rem;color:#fff;position:relative;overflow:hidden}
+.ql-blob{position:absolute;border-radius:50%;filter:blur(50px);pointer-events:none}
+.ql1{width:200px;height:200px;background:rgba(255,255,255,.08);top:-60px;right:-60px}
+.ql2{width:150px;height:150px;background:rgba(255,255,255,.06);bottom:-40px;left:-40px}
+.quote-left h3{font-family:var(--fh);font-size:1.25rem;font-weight:800;margin-bottom:.6rem;position:relative;z-index:1}
+.quote-left>p{font-size:.9rem;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:1.5rem;position:relative;z-index:1}
+.quote-perks{display:flex;flex-direction:column;gap:.65rem;position:relative;z-index:1}
+.qp{display:flex;align-items:center;gap:10px;font-size:.87rem;font-weight:500}
+.qp svg{width:15px;height:15px;stroke:rgba(255,255,255,.9);fill:none;stroke-width:2.5;flex-shrink:0}
+.quote-right{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:2rem}
+.quote-right h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;margin-bottom:.3rem}
+.quote-right>p{font-size:.86rem;color:var(--muted);margin-bottom:1.5rem}
+.q-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.q-field{display:flex;flex-direction:column;gap:.35rem}
+.q-field.full{grid-column:1/-1}
+.q-field label{font-size:.78rem;font-weight:600;color:var(--text)}
+.q-field input,.q-field select,.q-field textarea{padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:10px;font-family:var(--fb);font-size:.86rem;color:var(--text);background:var(--surf);outline:none;transition:border-color .2s,box-shadow .2s}
+.q-field input:focus,.q-field select:focus,.q-field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt)}
+.q-field textarea{resize:vertical;min-height:80px}
+.btn-quote{width:100%;margin-top:1.2rem;padding:.82rem 1.5rem;background:var(--grad-vio);color:#fff;border:none;border-radius:11px;font-family:var(--fh);font-weight:800;font-size:.93rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;box-shadow:0 5px 18px rgba(124,58,237,.35);letter-spacing:.01em}
+.btn-quote:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,58,237,.45)}
+.btn-quote:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-quote svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5}
+.quote-success{display:none;text-align:center;padding:2.5rem 1rem}
+.quote-success.show{display:block}
+.qs-icon{font-size:3rem;margin-bottom:1rem}
+.quote-success h3{font-family:var(--fh);font-size:1.2rem;font-weight:800;margin-bottom:.6rem}
+.quote-success p{font-size:.9rem;color:var(--muted);line-height:1.7}
+
+/* ── CTA SECTION ── */
+.cta-section{margin-top:5rem;background:linear-gradient(135deg,#120a2e,#0a2030);border-radius:24px;padding:4rem 3rem;text-align:center;position:relative;overflow:hidden}
+.cta-blob{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+.cb1{width:300px;height:300px;background:rgba(124,58,237,.2);top:-80px;right:-60px}
+.cb2{width:220px;height:220px;background:rgba(14,165,160,.15);bottom:-60px;left:-40px}
+.cta-section h2{font-family:var(--fh);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;color:#fff;letter-spacing:-.025em;margin-bottom:.8rem;position:relative;z-index:1}
+.cta-section p{font-size:1rem;color:rgba(255,255,255,.65);max-width:500px;margin:0 auto 2rem;line-height:1.7;position:relative;z-index:1}
+.cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;margin-bottom:1.5rem}
+.btn-cta-main{display:inline-flex;align-items:center;gap:8px;background:var(--grad-vio);color:#fff;border:none;border-radius:12px;padding:.9rem 2rem;font-family:var(--fh);font-weight:800;font-size:.95rem;cursor:pointer;transition:all .22s;box-shadow:0 6px 20px rgba(124,58,237,.4);text-decoration:none}
+.btn-cta-main:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(124,58,237,.5)}
+.btn-cta-sec{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:.88rem 1.8rem;font-family:var(--fh);font-weight:700;font-size:.93rem;cursor:pointer;transition:all .22s;text-decoration:none}
+.btn-cta-sec:hover{background:rgba(255,255,255,.18)}
+.guarantee{font-size:.8rem;color:rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;gap:7px;position:relative;z-index:1}
+.guarantee svg{width:14px;height:14px;stroke:rgba(255,255,255,.4);fill:none;stroke-width:2}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d2626;color:#fff;padding:.7rem 1.4rem;border-radius:50px;font-size:.87rem;font-weight:600;opacity:0;transition:all .35s;z-index:999;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:linear-gradient(135deg,#065f46,#0f766e)}
+.toast.error{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .what-grid,.stack-grid,.pricing-cards{grid-template-columns:repeat(2,1fr)}
+  .included-grid,.quote-wrap{grid-template-columns:1fr}
+  .process-strip{grid-template-columns:repeat(3,1fr)}
+  .timeline{grid-template-columns:repeat(3,1fr)}
+  .timeline::before{display:none}
+  .comp-table{font-size:.78rem}
+}
+@media(max-width:600px){
+  .what-grid,.stack-grid,.pricing-cards{grid-template-columns:1fr}
+  .q-grid{grid-template-columns:1fr}
+  .process-strip{grid-template-columns:repeat(2,1fr)}
+  .timeline{grid-template-columns:repeat(2,1fr)}
+  .comp-table th:nth-child(3),.comp-table td:nth-child(3){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a href="/" class="logo">
+    <div class="logo-box">
+      <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </div>
+    VoiceBill
+  </a>
+  <a href="/" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="hero-inner">
+    <div class="nw-badge"><span></span> New Website Plan</div>
+    <h1>Your restaurant deserves a<br><em>website built for revenue</em></h1>
+    <p class="hero-sub">We design and develop a fully custom restaurant website from scratch — with VoiceBill's voice ordering, billing, and management system baked right in from day one.</p>
+    <div class="price-block">
+      <span class="currency">₹</span>
+      <span class="amount">39,000</span>
+      <span class="period">/ one-time quote</span>
+    </div>
+    <p class="price-note"><b>Typically ₹25,000 – ₹75,000</b> based on design complexity &amp; features. No recurring fees until you go live.</p>
+    <div class="hero-cta">
+      <a href="#quote" class="btn-start">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Get a Free Quote
+      </a>
+      <a href="/demo" class="btn-ghost">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        See Voice Demo
+      </a>
+    </div>
+
+    <!-- Process strip -->
+    <div class="process-strip">
+      <div class="ps-step">
+        <div class="ps-num">1</div>
+        <div class="ps-label">Discovery Call</div>
+      </div>
+      <div class="ps-step">
+        <div class="ps-num">2</div>
+        <div class="ps-label">Design &amp; Approval</div>
+      </div>
+      <div class="ps-step">
+        <div class="ps-num">3</div>
+        <div class="ps-label">Development</div>
+      </div>
+      <div class="ps-step">
+        <div class="ps-num">4</div>
+        <div class="ps-label">VoiceBill Integration</div>
+      </div>
+      <div class="ps-step">
+        <div class="ps-num">5</div>
+        <div class="ps-label">Launch &amp; Handover</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="main">
+
+  <!-- WHAT YOU GET -->
+  <section>
+    <span class="sec-tag">What's Included</span>
+    <h2 class="sec-title">Everything to launch your digital presence</h2>
+    <p class="sec-sub">Not a template. Not a WordPress theme. A tailor-made website built exactly for your restaurant and brand.</p>
+
+    <div class="what-grid">
+      <div class="what-card">
+        <div class="what-icon">🎨</div>
+        <h3>Custom UI Design <span class="what-badge">Figma</span></h3>
+        <p>Bespoke layouts, color palettes, and typography that match your restaurant's personality — menus, landing pages, gallery, and more.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🎙️</div>
+        <h3>Voice Ordering Built In</h3>
+        <p>VoiceBill's AI voice ordering is embedded natively — customers or staff speak their order, the system does the rest.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🧾</div>
+        <h3>Automated GST Billing</h3>
+        <p>Full billing engine with GST calculation, digital invoices, print-ready bills, and WhatsApp sharing — built into your site.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">📱</div>
+        <h3>Fully Responsive</h3>
+        <p>Pixel-perfect on mobile, tablet, and desktop. Works seamlessly on Android and iOS with no app download required.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🍽️</div>
+        <h3>Online Menu &amp; Ordering <span class="what-badge">QR</span></h3>
+        <p>Digital menu with categories, images, prices, and dietary tags. Scan-to-order via QR code at every table.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">📊</div>
+        <h3>Analytics Dashboard <span class="what-badge">Pro</span></h3>
+        <p>Sales reports, top items, peak hours, and revenue trends in a clean dashboard — only you can see it.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🔒</div>
+        <h3>Secure &amp; Hosted</h3>
+        <p>SSL certificate, managed hosting, automatic backups, and 99.9% uptime — included for the first year.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🧑‍🍳</div>
+        <h3>Kitchen Display Screen</h3>
+        <p>Dedicated KOT screen for the kitchen showing live orders, status updates, and priority flags in real time.</p>
+      </div>
+      <div class="what-card">
+        <div class="what-icon">🗓️</div>
+        <h3>Table Reservations <span class="what-badge">Optional</span></h3>
+        <p>Optional booking flow where guests can reserve tables online with automated confirmation messages via WhatsApp or email.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section class="stack-section">
+    <span class="sec-tag">Tech Stack</span>
+    <h2 class="sec-title">Built on modern, reliable technology</h2>
+    <p class="sec-sub">We use proven, fast frameworks so your site is blazing-fast and easy to maintain.</p>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-emoji">⚡</div>
+        <h4>Next.js / React</h4>
+        <p>Lightning-fast frontend with server-side rendering and seamless page transitions.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🎨</div>
+        <h4>Tailwind CSS</h4>
+        <p>Pixel-perfect, consistent design system with your custom brand colors and fonts.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🗄️</div>
+        <h4>Supabase / Firebase</h4>
+        <p>Real-time database for orders, menu updates, and customer data — synced instantly.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🎙️</div>
+        <h4>VoiceBill Engine</h4>
+        <p>Our proprietary voice-to-order AI supporting English and Hindi with 99.8% accuracy.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🌐</div>
+        <h4>Custom Domain</h4>
+        <p>yourrestaurant.com — we handle domain setup, DNS, and SSL certificate configuration.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">☁️</div>
+        <h4>Vercel / AWS</h4>
+        <p>Enterprise-grade hosting with global CDN, auto-scaling, and 99.9% uptime SLA.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">📲</div>
+        <h4>WhatsApp API</h4>
+        <p>Automated bill sharing, booking confirmations, and order updates via WhatsApp Business.</p>
+      </div>
+      <div class="stack-card">
+        <div class="stack-emoji">🔐</div>
+        <h4>Auth &amp; Roles</h4>
+        <p>Secure login for owners, managers, waiters, and kitchen staff — each with the right access.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INCLUDED FEATURES -->
+  <section style="margin-top:5rem">
+    <span class="sec-tag">Full Feature List</span>
+    <h2 class="sec-title">Nothing left out</h2>
+    <p class="sec-sub">Every plan includes the core VoiceBill suite plus your brand-new website — fully owned by you.</p>
+
+    <div class="included-grid">
+      <div class="inc-card">
+        <div class="inc-head">
+          <span style="font-size:1.2rem">🏗️</span>
+          <span class="inc-cat">Website &amp; Design</span>
+        </div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom Figma design mockups</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to 10 unique pages</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Photo gallery &amp; food photography layout</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>About, Contact, Location page</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SEO-optimised pages &amp; metadata</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Google Maps integration <span class="vtag">Built-in</span></div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Social media links &amp; sharing</div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head">
+          <span style="font-size:1.2rem">🎙️</span>
+          <span class="inc-cat">Voice &amp; Billing</span>
+        </div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>AI voice ordering (EN + Hindi) <span class="vtag">VoiceBill</span></div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Instant GST bill generation</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Print &amp; WhatsApp bill sharing</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Kitchen order ticket (KOT) screen</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Table &amp; order management</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Digital menu with QR code</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Staff role access (5 accounts)</div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head">
+          <span style="font-size:1.2rem">📊</span>
+          <span class="inc-cat">Analytics &amp; Reports</span>
+        </div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Daily / weekly / monthly sales reports</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Top-selling items dashboard</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Peak hour analysis</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Revenue trend charts</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Export reports (PDF / Excel)</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Customer order history <span class="vtag">Pro</span></div>
+        </div>
+      </div>
+      <div class="inc-card">
+        <div class="inc-head">
+          <span style="font-size:1.2rem">🛡️</span>
+          <span class="inc-cat">Support &amp; Maintenance</span>
+        </div>
+        <div class="inc-list">
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated project manager</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>60-day post-launch support</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Staff training session (1 hr)</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>1 year free hosting &amp; SSL</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full source code ownership</div>
+          <div class="inc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority WhatsApp support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TIERS -->
+  <section class="pricing-section">
+    <span class="sec-tag">Packages</span>
+    <h2 class="sec-title">Choose your package</h2>
+    <p class="sec-sub">All packages are one-time payments. No monthly fees until your optional ₹499/mo maintenance plan (after year 1).</p>
+
+    <div class="pricing-cards">
+      <div class="pc">
+        <div class="pc-name">Starter</div>
+        <div class="pc-price"><sup>₹</sup>24,999</div>
+        <div class="pc-sub">One-time · Perfect for small restaurants</div>
+        <div class="pc-divider"></div>
+        <div class="pc-list">
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>5-page custom website</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Voice ordering integration</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>GST billing system</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Digital menu + QR code</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>6 months hosting + SSL</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>30-day support</div>
+          <div class="pc-item no"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Analytics dashboard</div>
+          <div class="pc-item no"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Table reservations</div>
+        </div>
+        <button class="pc-btn pc-btn-outline" onclick="preselectPackage('Starter – ₹24,999')">Get Starter Quote</button>
+      </div>
+
+      <div class="pc featured">
+        <div class="pc-badge">⭐ MOST POPULAR</div>
+        <div class="pc-name">Professional</div>
+        <div class="pc-price"><sup>₹</sup>44,999</div>
+        <div class="pc-sub">One-time · For growing restaurants</div>
+        <div class="pc-divider"></div>
+        <div class="pc-list">
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>10-page custom website</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Voice ordering + Hindi support</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>GST billing + WhatsApp sharing</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Analytics dashboard</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Kitchen display screen</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>1 year hosting + SSL</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>60-day support + training</div>
+          <div class="pc-item no"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Table reservations system</div>
+        </div>
+        <button class="pc-btn pc-btn-fill" onclick="preselectPackage('Professional – ₹44,999')">Get Pro Quote</button>
+      </div>
+
+      <div class="pc">
+        <div class="pc-name">Enterprise</div>
+        <div class="pc-price"><sup>₹</sup>74,999</div>
+        <div class="pc-sub">One-time · Full-featured flagship site</div>
+        <div class="pc-divider"></div>
+        <div class="pc-list">
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited pages + custom animations</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>All voice &amp; billing features</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Table reservations system</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics + exports</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Loyalty / rewards system</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Multi-branch support</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>2 years hosting + SSL</div>
+          <div class="pc-item"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>90-day priority support</div>
+        </div>
+        <button class="pc-btn pc-btn-outline" onclick="preselectPackage('Enterprise – ₹74,999')">Get Enterprise Quote</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERY TIMELINE -->
+  <section class="timeline-section">
+    <span class="sec-tag">Delivery Timeline</span>
+    <h2 class="sec-title">From quote to live in 4–6 weeks</h2>
+    <p class="sec-sub">A structured process so you always know where things stand.</p>
+
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-dot">📞</div>
+        <div class="tl-week">Week 1</div>
+        <div class="tl-label">Discovery &amp; Scoping</div>
+        <div class="tl-desc">Call to understand your brand, menu, and needs</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🎨</div>
+        <div class="tl-week">Week 1–2</div>
+        <div class="tl-label">Design Mockups</div>
+        <div class="tl-desc">Figma designs for your approval before any code is written</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">💻</div>
+        <div class="tl-week">Week 2–4</div>
+        <div class="tl-label">Development</div>
+        <div class="tl-desc">Full site built with VoiceBill integration &amp; all features</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🧪</div>
+        <div class="tl-week">Week 4–5</div>
+        <div class="tl-label">Testing &amp; Review</div>
+        <div class="tl-desc">QA, your feedback round, final tweaks, and content upload</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-dot">🚀</div>
+        <div class="tl-week">Week 5–6</div>
+        <div class="tl-label">Launch &amp; Handover</div>
+        <div class="tl-desc">Go live, staff training, and source code handover</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE -->
+  <section class="comparison-section">
+    <span class="sec-tag">Compare Plans</span>
+    <h2 class="sec-title">How New Website stacks up</h2>
+    <p class="sec-sub">See how our New Website plan compares to the other VoiceBill options.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th style="width:35%">Feature</th>
+          <th class="hl">🌐 New Website</th>
+          <th>⚡ One Time</th>
+          <th>📅 Pay As You Go</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Voice ordering</td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Automated GST billing</td><td class="hl-cell"><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Custom website built for you</td><td class="hl-cell"><span class="yes">✓</span></td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Analytics &amp; reports</td><td class="hl-cell"><span class="yes">✓</span></td><td class="no">—</td><td><span class="yes">✓</span></td></tr>
+        <tr><td>Table reservations</td><td class="hl-cell"><span class="yes">✓ Optional</span></td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Loyalty / rewards system</td><td class="hl-cell"><span class="yes">✓ Enterprise</span></td><td class="no">—</td><td class="no">—</td></tr>
+        <tr><td>Source code ownership</td><td class="hl-cell"><span class="yes">✓ Full</span></td><td><span class="yes">✓ Full</span></td><td class="no">—</td></tr>
+        <tr><td>Monthly subscription</td><td class="hl-cell">None (yr 1)</td><td>None</td><td><strong>₹1,499/mo</strong></td></tr>
+        <tr><td>Hosting included</td><td class="hl-cell"><span class="yes">✓ 1–2 yrs</span></td><td class="no">Own hosting</td><td><span class="yes">✓ Included</span></td></tr>
+        <tr><td>Setup / build cost</td><td class="hl-cell"><strong>₹25k–75k</strong></td><td>Custom quote</td><td>None</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <span class="sec-tag">FAQ</span>
+    <h2 class="sec-title">Common questions</h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I own the website and source code after launch?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Yes — 100%. Once the project is complete and final payment is made, you receive the full source code, design files, and all assets. There are no licensing fees or lock-in. You are free to host it anywhere or have any developer maintain it.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How long does it take to build the website?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Typically 4–6 weeks depending on the package and complexity. Starter projects often complete in 3 weeks. Enterprise projects with custom features may take up to 8 weeks. We provide a clear timeline at the start of every project.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What do I need to provide to get started?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Your menu (we can digitise a physical one), your logo (or we can suggest a designer), and any photos of your restaurant or food. Everything else — hosting, domain, design, development, and VoiceBill setup — is handled by our team.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is hosting and domain included?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Starter includes 6 months of free hosting and SSL. Professional and Enterprise include 1–2 years. Domain registration (yourrestaurant.com) is included in Professional and Enterprise, or can be added to Starter at cost. After the included period, renewal is approximately ₹4,999/year for hosting.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Are there any monthly fees after launch?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">No mandatory monthly fees during the included hosting period. After that, you can choose our optional maintenance plan at ₹499/month (hosting + security updates + minor edits), or host and maintain it yourself — we'll give you full documentation.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I add extra pages or features later?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Absolutely. Additional pages and features can be quoted and added at any time. Since you own the source code, you can also have your own developer add features independently.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Does it support multiple restaurant branches?
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="faq-a">Yes — the Enterprise plan includes multi-branch support with separate menus, billing, and staff management per location, all under one owner dashboard. For Starter and Professional, multi-branch can be added as a custom feature.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE FORM -->
+  <section id="quote" class="quote-section">
+    <span class="sec-tag">Get Started</span>
+    <h2 class="sec-title">Request your free website quote</h2>
+    <p class="sec-sub">Tell us about your restaurant and we'll come back within 24 hours with a detailed scope and exact pricing.</p>
+
+    <div class="quote-wrap">
+      <div class="quote-left">
+        <div class="ql-blob ql1"></div>
+        <div class="ql-blob ql2"></div>
+        <h3>Why choose the New Website plan?</h3>
+        <p>Start completely fresh with a professional online presence — designed around your brand, powered by VoiceBill from day one.</p>
+        <div class="quote-perks">
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Free quote — no obligation</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Response within 24 hours</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated project manager</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Design mockups before payment</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Full source code ownership</div>
+          <div class="qp"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>60-day post-launch support</div>
+        </div>
+      </div>
+
+      <div class="quote-right">
+        <div id="quoteForm">
+          <h3>Tell us about your restaurant</h3>
+          <p>Fill in the details and we'll prepare your custom quote.</p>
+          <div class="q-grid">
+            <div class="q-field"><label>Restaurant Name <span style="color:var(--teal)">*</span></label><input type="text" id="q-name" placeholder="e.g. Spice Garden"></div>
+            <div class="q-field"><label>Your Name <span style="color:var(--teal)">*</span></label><input type="text" id="q-owner" placeholder="Owner / Manager name"></div>
+            <div class="q-field"><label>Email Address <span style="color:var(--teal)">*</span></label><input type="email" id="q-email" placeholder="owner@restaurant.com"></div>
+            <div class="q-field"><label>Phone Number <span style="color:var(--teal)">*</span></label><input type="tel" id="q-phone" placeholder="+91 98765 43210"></div>
+            <div class="q-field">
+              <label>Package Interested In</label>
+              <select id="q-package">
+                <option value="">— Not sure yet —</option>
+                <option>Starter – ₹24,999</option>
+                <option>Professional – ₹44,999</option>
+                <option>Enterprise – ₹74,999</option>
+                <option>Custom / Let us suggest</option>
+              </select>
+            </div>
+            <div class="q-field">
+              <label>Number of Branches</label>
+              <select id="q-branches">
+                <option value="1">1 (Single location)</option>
+                <option value="2-5">2–5 branches</option>
+                <option value="5+">5+ branches</option>
+              </select>
+            </div>
+            <div class="q-field">
+              <label>City</label>
+              <input type="text" id="q-city" placeholder="e.g. Ahmedabad">
+            </div>
+            <div class="q-field">
+              <label>Cuisine Type</label>
+              <input type="text" id="q-cuisine" placeholder="e.g. North Indian, Chinese...">
+            </div>
+            <div class="q-field full"><label>Do you have an existing website or design preferences?</label><textarea id="q-notes" placeholder="Share any website links, reference designs, or special feature requests..."></textarea></div>
+          </div>
+          <button class="btn-quote" id="quoteBtn" onclick="submitQuote()">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Send Quote Request
+          </button>
+        </div>
+        <div class="quote-success" id="quoteSuccess">
+          <div class="qs-icon">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>We've received your details and will prepare a custom website proposal for <strong id="qs-email">your email</strong> within 24 hours. Our team may call to understand your vision better.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM CTA -->
+ <section class="cta-section">
+    <div class="cta-blob cb1"></div>
+    <div class="cta-blob cb2"></div>
+    <h2>Ready to automate your restaurant?</h2>
+    <p>Start your 14-day free trial today. No credit card, no contracts, no setup fees — just results.</p>
+    <div class="cta-btns">
+      <a href="/register?plan=payg" class="btn-cta-main">Start Free Trial →</a>
+      <a href="/demo" class="btn-cta-sec">🎙️ Try Voice Demo</a>
+    </div>
+    <p class="guarantee">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      14-day free trial &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No credit card required
+    </p>
+  </section>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function preselectPackage(pkg) {
+  document.getElementById('q-package').value = pkg;
+  document.getElementById('quote').scrollIntoView({ behavior: 'smooth' });
+}
+
+function submitQuote() {
+  const name = v('q-name'), owner = v('q-owner'), email = v('q-email'), phone = v('q-phone');
+  if (!name)  { showToast('⚠️ Please enter your restaurant name', 'error'); return; }
+  if (!owner) { showToast('⚠️ Please enter your name', 'error'); return; }
+  if (!email || !isEmail(email)) { showToast('⚠️ Please enter a valid email', 'error'); return; }
+  if (!phone) { showToast('⚠️ Please enter your phone number', 'error'); return; }
+
+  const btn = document.getElementById('quoteBtn');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:white;fill:none;stroke-width:2;animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Sending…';
+  btn.disabled = true;
+
+  const q = {
+    id: 'NW-' + Math.floor(100000 + Math.random() * 900000),
+    name, owner, email, phone,
+    package: v('q-package'),
+    branches: v('q-branches'),
+    city: v('q-city'),
+    cuisine: v('q-cuisine'),
+    notes: v('q-notes'),
+    plan: 'New Website',
+    submittedAt: new Date().toISOString(),
+    status: 'pending',
+    credentials: null
+  };
+
+  try {
+    const existing = JSON.parse(localStorage.getItem('voicebill_registrations') || '[]');
+    existing.push(q);
+    localStorage.setItem('voicebill_registrations', JSON.stringify(existing));
+  } catch(e) {}
+
+  setTimeout(() => {
+    document.getElementById('qs-email').textContent = email;
+    document.getElementById('quoteForm').style.display = 'none';
+    document.getElementById('quoteSuccess').classList.add('show');
+    showToast('🎉 Quote request submitted!', 'success');
+  }, 1000);
+}
+
+let _tt;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// Pre-select package if coming from landing page
+try {
+  const pre = sessionStorage.getItem('vb_preselect_plan');
+  if (pre && pre.includes('New Website')) {
+    document.getElementById('q-package').value = 'Professional – ₹44,999';
+  }
+} catch(e) {}
+
+const s = document.createElement('style');
+s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(s);
+</script>
+
+</body>
+</html>

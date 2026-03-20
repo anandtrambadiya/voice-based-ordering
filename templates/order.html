@@ -1,16 +1,18 @@
 {% extends "base.html" %}
-{% block title %}New Order — {{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}
+{% block title %}{{ 'New Order' }} — {{ current_restaurant.name if current_restaurant else 'VoiceBill' }}{% endblock %}
 
 {% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-{% if customer_table %}
+{% if is_customer %}
 <style>
 nav { display: none !important; }
 .app-wrap { height: 100vh !important; }
-.cust-header{background:#fff;border-bottom:1.5px solid var(--bdr);padding:.6rem 1.2rem;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.cust-logo{width:28px;height:28px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
-.cust-biz{font-family:var(--fh);font-size:.9rem;font-weight:800;color:var(--txt);}
-.cust-tag{font-size:.72rem;color:var(--txt3);font-weight:500;margin-left:2px;}
+.cust-header{background:#fff;border-bottom:1.5px solid var(--bdr);padding:.65rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.cust-left{display:flex;align-items:center;gap:10px;}
+.cust-icon{width:34px;height:34px;background:var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 2px 8px rgba(14,165,160,.25);}
+.cust-biz{font-family:var(--fh);font-size:.92rem;font-weight:800;color:var(--txt);}
+.cust-tag{font-size:.68rem;color:var(--txt3);margin-top:1px;}
+.cust-badge{font-size:.65rem;font-weight:700;padding:.2rem .65rem;border-radius:50px;background:var(--teal-lt);color:var(--teal);border:1px solid var(--teal-bd);font-family:var(--fm);}
 </style>
 {% endif %}
 <style>
@@ -201,13 +203,18 @@ body { overflow: hidden; }
 
 {% block content %}
 <div class="app-wrap">
-{% if customer_table %}
+{% if is_customer %}
 <div class="cust-header">
-  <div class="cust-logo">🍽️</div>
-  <div>
-    <div class="cust-biz">{{ current_restaurant.name if current_restaurant else 'VoiceBill' }}</div>
-    <div class="cust-tag">Tap mic or add items to order</div>
+  <div class="cust-left">
+    <div class="cust-icon">{% if biz_mode == 'dine_in' %}🍽️{% elif current_restaurant and current_restaurant.business_type == 'medical' %}💊{% elif current_restaurant and current_restaurant.business_type == 'cafe' %}☕{% elif current_restaurant and current_restaurant.business_type == 'grocery' %}🛒{% else %}🏪{% endif %}</div>
+    <div>
+      <div class="cust-biz">{{ current_restaurant.name if current_restaurant else 'VoiceBill' }}</div>
+      <div class="cust-tag">Tap mic or add {{ biz_labels.get('item','item') }}s to order</div>
+    </div>
   </div>
+  {% if biz_mode == 'dine_in' and customer_table %}
+  <div class="cust-badge">Table {{ customer_table }}</div>
+  {% endif %}
 </div>
 {% endif %}
 <div class="app">
@@ -217,7 +224,7 @@ body { overflow: hidden; }
     <div class="menu-top">
       <div class="search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="srchInput" placeholder="Search dishes…" oninput="doFilter()">
+        <input type="text" id="srchInput" placeholder="Search items…" oninput="doFilter()">
       </div>
       <div class="cats" id="catTabs"></div>
     </div>
@@ -229,16 +236,17 @@ body { overflow: hidden; }
     <div class="vz">
       <div class="vz-row">
         <span class="vz-lbl">Voice Order <span style="font-size:.55rem;color:var(--teal);font-weight:500;text-transform:none;letter-spacing:0">(tap to start/stop)</span></span>
+        {% if biz_mode == 'dine_in' and not is_customer %}
         <div class="tbl-chip">Table
-          {% if customer_table %}
-            <span style="font-weight:800;padding:0 2px">{{ customer_table }}</span>
-            <input type="hidden" id="tableNo" value="{{ customer_table }}">
-          {% else %}
-            <select id="tableNo">
-              {% for i in range(1,11) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
-            </select>
-          {% endif %}
+          <select id="tableNo">
+            {% for i in range(1,11) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+          </select>
         </div>
+        {% elif biz_mode == 'dine_in' and is_customer %}
+        <input type="hidden" id="tableNo" value="{{ customer_table }}">
+        {% else %}
+        <input type="hidden" id="tableNo" value="1">
+        {% endif %}
       </div>
       <div style="margin-bottom:.6rem">
         </div>
@@ -284,7 +292,7 @@ body { overflow: hidden; }
       </div>
       <button class="cfm-btn" id="cfmBtn" onclick="confirmOrder()" disabled>
         <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Confirm &amp; Generate {{ biz_labels.get('order','Bill') }}
+        Confirm &amp; Generate Bill
       </button>
     </div>
   </div>
@@ -506,7 +514,7 @@ function stopMic() {
 }
 
 function startMic() {
-  if (!SR) { showToast('Use Chrome for voice', 'error'); simulate('Two butter chicken and one naan'); return; }
+  if (!SR) { showToast('Use Chrome for voice', 'error'); simulate('two ' + (MENU[0]?.name || 'item')); return; }
 
   setMic('listening');
   const tb = document.getElementById('txBox'); tb.textContent = ''; tb.classList.add('show');
@@ -799,11 +807,12 @@ async function confirmOrder() {
   const table = document.getElementById('tableNo').value;
   let final, orderId;
 
+  let shortId = null;
   if (CTOKEN) {
     const r = await fetch('/api/customer/order', { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ token: CTOKEN, table_no: table, items: cart.map(c=>({menu_item_id:c.item.id,quantity:c.qty})) }) });
     const d = await r.json();
-    orderId = d.order_id;
+    orderId = d.order_id; shortId = d.short_id;
     const sub = cart.reduce((s,c)=>s+c.item.price*c.qty,0);
     final = { subtotal: sub, tax: Math.round(sub*.05), total: sub+Math.round(sub*.05) };
   } else {
@@ -814,16 +823,24 @@ async function confirmOrder() {
     }
     const r3 = await fetch(`/api/orders/${order.id}/place`, { method:'POST' });
     final = await r3.json();
-    orderId = order.id;
+    orderId = order.id; shortId = final.short_id;
   }
   curOrderId = orderId;
 
   const sub = final.subtotal, gst = final.tax, tot = final.total;
   const half = (gst / 2).toFixed(2);
   const now  = new Date();
-  document.getElementById('bmOid').textContent  = '#ORD-' + String(curOrderId).padStart(4,'0');
-  document.getElementById('bmSub').textContent  = `Table ${table} · ${cart.reduce((s,c)=>s+c.qty,0)} items`;
-  document.getElementById('bmTbl').textContent  = 'Table ' + table;
+  document.getElementById('bmOid').textContent  = shortId || ('#ORD-' + String(curOrderId).padStart(4,'0'));
+  const itemCount = cart.reduce((s,c)=>s+c.qty,0);
+  const BIZ_MODE_JS = '{{ biz_mode }}';
+  if (BIZ_MODE_JS === 'dine_in') {
+    document.getElementById('bmSub').textContent = `Table ${table} · ${itemCount} items`;
+    document.getElementById('bmTbl').textContent = 'Table ' + table;
+    document.getElementById('bmTbl').closest('.bm-ir').style.display = '';
+  } else {
+    document.getElementById('bmSub').textContent = `${itemCount} item${itemCount!==1?'s':''}`;
+    document.getElementById('bmTbl').closest('.bm-ir').style.display = 'none';
+  }
   document.getElementById('bmTime').textContent = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' · ' + now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('bmBiz').textContent  = BIZ_NAME;
   document.getElementById('bmBizName').textContent = BIZ_NAME;
@@ -853,18 +870,8 @@ function newOrder() {
 }
 
 async function downloadBill() {
-  const btn = document.getElementById('dlBtn');
-  const orig = btn.innerHTML; btn.innerHTML = '⏳…'; btn.disabled = true;
-  try {
-    const canvas = await html2canvas(document.getElementById('billModal'), { backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false });
-    const a = document.createElement('a');
-    a.download = `VoiceBill-ORD-${String(curOrderId).padStart(4,'0')}.png`;
-    a.href = canvas.toDataURL('image/png'); a.click();
-    showToast('✅ Bill downloaded!', 'success');
-  } catch(e) {
-    window.open(`/api/orders/${curOrderId}/invoice`, '_blank');
-  }
-  btn.innerHTML = orig; btn.disabled = false;
+  window.open(`/api/orders/${curOrderId}/invoice`, '_blank');
+  showToast('✅ Opening PDF invoice…', 'success');
 }
 
 function printBill() { window.print(); }

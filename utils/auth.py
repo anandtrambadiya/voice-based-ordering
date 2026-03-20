@@ -24,7 +24,7 @@ def _redirect_or_401():
 def _forbidden_or_403(msg='Access denied'):
     if _is_api():
         return jsonify({'error': msg}), 403
-    return redirect(url_for('orders.new_order_page'))
+    return redirect('/order/new')
 
 
 def login_required(f):
@@ -57,5 +57,16 @@ def staff_required(f):
             return _redirect_or_401()
         if session.get('role') not in ('owner', 'staff'):
             return _forbidden_or_403('Staff access required')
+        return f(*args, **kwargs)
+    return decorated
+
+def admin_required(f):
+    """VoiceBill admin panel only."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('is_admin'):
+            if _is_api():
+                return jsonify({'error': 'Admin access required'}), 401
+            return redirect('/admin')
         return f(*args, **kwargs)
     return decorated

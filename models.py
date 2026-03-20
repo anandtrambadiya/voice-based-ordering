@@ -8,7 +8,7 @@ db = SQLAlchemy()
 BUSINESS_LABELS = {
     'restaurant': {'item': 'Item',     'category': 'Category', 'table': 'Table',   'order': 'Order'},
     'grocery':    {'item': 'Product',  'category': 'Aisle',    'table': 'Counter', 'order': 'Bill'},
-    'medical':    {'item': 'Medicine', 'category': 'Type',     'table': 'Counter', 'order': 'Prescription'},
+    'medical':    {'item': 'Medicine', 'category': 'Type',     'table': 'Counter', 'order': 'Order'},
     'mart':       {'item': 'Product',  'category': 'Section',  'table': 'Counter', 'order': 'Bill'},
     'cafe':       {'item': 'Item',     'category': 'Category', 'table': 'Table',   'order': 'Order'},
 }
@@ -86,8 +86,9 @@ class Order(db.Model):
     __tablename__ = 'orders'
     id            = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
-    table_no      = db.Column(db.String(10), default='1')
-    status        = db.Column(db.String(20), default='pending')
+    table_no        = db.Column(db.String(10), default='1')
+    customer_mobile = db.Column(db.String(15), nullable=True)
+    status          = db.Column(db.String(20), default='placed')
     subtotal      = db.Column(db.Float, default=0.0)
     tax           = db.Column(db.Float, default=0.0)
     total         = db.Column(db.Float, default=0.0)
@@ -95,10 +96,22 @@ class Order(db.Model):
     items         = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
 
     def to_dict(self):
+        # Short biz prefix for order ID
+        biz_name = self.restaurant.name if self.restaurant else ''
+        prefix   = ''.join(w[0] for w in biz_name.upper().split()[:3]) or 'ORD'
+        # Per-restaurant sequence count
+        from sqlalchemy import func
+        seq = db.session.query(func.count(Order.id)).filter(
+            Order.restaurant_id == self.restaurant_id,
+            Order.id <= self.id
+        ).scalar() or self.id
+        short_id = f'{prefix}-{seq:04d}'
         return {
-            'id':         self.id,
-            'table_no':   self.table_no,
-            'status':     self.status,
+            'id':              self.id,
+            'short_id':        short_id,
+            'table_no':        self.table_no,
+            'customer_mobile': self.customer_mobile,
+            'status':          self.status,
             'subtotal':   self.subtotal,
             'tax':        self.tax,
             'total':      self.total,
@@ -125,6 +138,39 @@ class OrderItem(db.Model):
             'subtotal': round(self.price * self.quantity, 2)
         }
 
+
+
+class Registration(db.Model):
+    __tablename__ = 'registrations'
+    id            = db.Column(db.Integer, primary_key=True)
+    ref_id        = db.Column(db.String(20), unique=True, nullable=False)
+    business_name = db.Column(db.String(150), nullable=False)
+    business_type = db.Column(db.String(50))
+    owner_name    = db.Column(db.String(100))
+    email         = db.Column(db.String(150), nullable=False)
+    phone         = db.Column(db.String(20))
+    city          = db.Column(db.String(100))
+    plan          = db.Column(db.String(50))
+    status        = db.Column(db.String(20), default='pending')  # pending/approved/rejected
+    submitted_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    approved_at   = db.Column(db.DateTime, nullable=True)
+    notes         = db.Column(db.String(300), nullable=True)
+
+    def to_dict(self):
+        return {
+            'id':            self.id,
+            'ref_id':        self.ref_id,
+            'business_name': self.business_name,
+            'business_type': self.business_type,
+            'owner_name':    self.owner_name,
+            'email':         self.email,
+            'phone':         self.phone,
+            'city':          self.city,
+            'plan':          self.plan,
+            'status':        self.status,
+            'submitted_at':  self.submitted_at.strftime('%d %b %Y, %I:%M %p') if self.submitted_at else None,
+            'approved_at':   self.approved_at.strftime('%d %b %Y') if self.approved_at else None,
+        }
 
 def generate_password(length=10):
     chars = string.ascii_letters + string.digits

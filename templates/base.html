@@ -97,7 +97,7 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-<nav>
+{% if not is_customer %}<nav>
   <div class="nav-left">
     <a class="nav-logo" href="/"><span class="logo-dot"></span>VoiceBill</a>
     {% if current_restaurant %}
@@ -105,10 +105,10 @@
     <span class="nav-biz">{{ current_restaurant.name }}</span>
     {% endif %}
     <div class="nav-links">
-      <a href="/" id="nav-dash" class="owner-only">Dashboard</a>
+      <a href="/dashboard" id="nav-dash" class="owner-only">Dashboard</a>
       <a href="/menu" id="nav-menu" class="owner-only">{{ biz_labels.get('item', 'Menu') }}s</a>
       <a href="/order/new" id="nav-order">New Order</a>
-      <a href="/orders" id="nav-orders">{{ biz_labels.get('order', 'Orders') }}s</a>
+      <a href="/orders" id="nav-orders">Bills</a>
       <a href="/analytics" id="nav-analytics" class="owner-only">Analytics</a>
       {% if biz_mode == 'dine_in' %}
       <a href="/tables" id="nav-tables" class="owner-only">QR Tables</a>
@@ -126,13 +126,13 @@
     {% endif %}
   </div>
 </nav>
-
+{% endif %}
 <div id="toast"></div>
 {% block content %}{% endblock %}
 
 <script>
   const path = location.pathname;
-  if (path === '/')                  document.getElementById('nav-dash')?.classList.add('active');
+  if (path === '/dashboard')         document.getElementById('nav-dash')?.classList.add('active');
   if (path === '/menu')              document.getElementById('nav-menu')?.classList.add('active');
   if (path.startsWith('/order/new')) document.getElementById('nav-order')?.classList.add('active');
   if (path === '/orders')            document.getElementById('nav-orders')?.classList.add('active');

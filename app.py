@@ -22,6 +22,7 @@ def create_app():
     from routes.analytics import analytics_bp
     from routes.customer  import customer_bp
     from routes.staff     import staff_bp
+    from routes.public import public_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(menu_bp)
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(analytics_bp)
     app.register_blueprint(customer_bp)
     app.register_blueprint(staff_bp)
+    app.register_blueprint(public_bp)
     app.register_blueprint(onboard_bp)
 
     # Load current user into g on every request

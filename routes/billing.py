@@ -9,13 +9,21 @@ billing_bp = Blueprint('billing', __name__)
 def generate_invoice(order_id):
     order = Order.query.get_or_404(order_id)
     restaurant = Restaurant.query.get(order.restaurant_id)
-    pdf_path = _generate_pdf(order, restaurant)
+    biz_name = restaurant.name if restaurant else ''
+    prefix   = ''.join(w[0] for w in biz_name.upper().split()[:3]) or 'ORD'
+    from models import db, Order as O
+    from sqlalchemy import func
+    seq = db.session.query(func.count(O.id)).filter(
+        O.restaurant_id == order.restaurant_id, O.id <= order.id
+    ).scalar() or order.id
+    short_id = f'{prefix}-{seq:04d}'
+    pdf_path = _generate_pdf(order, restaurant, short_id)
     return send_file(pdf_path, as_attachment=True,
-                     download_name=f'VoiceBill-ORD-{order.id:04d}.pdf',
+                     download_name=f'{short_id}.pdf',
                      mimetype='application/pdf')
 
 
-def _generate_pdf(order, restaurant):
+def _generate_pdf(order, restaurant, short_id=None):
     from fpdf import FPDF
 
     biz_name    = restaurant.name if restaurant else 'VoiceBill'
@@ -80,7 +88,7 @@ def _generate_pdf(order, restaurant):
     pdf.set_text_color(*GRAY)
     pdf.set_y(box_y + 3)
     pdf.set_x(22)
-    pdf.cell(W/2 - 4, 5, f'Invoice No:  ORD-{order.id:04d}', ln=False)
+    pdf.cell(W/2 - 4, 5, f'Invoice No:  {short_id}', ln=False)
     pdf.cell(W/2 - 4, 5, f'Date:  {order.created_at.strftime("%d %b %Y, %I:%M %p")}', ln=True, align='R')
     pdf.set_x(22)
     pdf.cell(W/2 - 4, 5, f'Table No:  {order.table_no}', ln=False)

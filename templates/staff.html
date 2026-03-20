@@ -48,7 +48,7 @@
 <div class="page">
   <div class="page-header">
     <h1>Staff Management</h1>
-    <p>Add cashiers and kitchen staff for your restaurant</p>
+    <p>Add staff members for {{ current_restaurant.name if current_restaurant else 'your business' }}</p>
   </div>
 
   <div class="staff-layout">
@@ -70,7 +70,7 @@
       <div class="form-group">
         <label>Role</label>
 <div style="background:var(--teal-lt);border:1.5px solid var(--teal-bd);border-radius:10px;padding:.65rem .9rem;font-size:.8rem;color:var(--teal);font-weight:600;">
-          👤 Staff — New Order, Orders &amp; Kitchen view
+          👤 Staff — New Order, Bills{% if biz_mode == 'dine_in' %} &amp; Kitchen{% endif %}
         </div>
       </div>
       <button class="btn btn-primary w-full" style="justify-content:center;margin-top:.4rem" onclick="addStaff()">
@@ -100,6 +100,8 @@ async function loadStaff() {
     list.innerHTML = `<div class="empty-staff"><div>👥</div>No staff added yet</div>`;
     return;
   }
+  // Sort owner first
+  data.sort((a,b) => a.role==='owner' ? -1 : b.role==='owner' ? 1 : 0);
   list.innerHTML = data.map(u => `
     <div class="staff-card">
       <div class="staff-avatar ${u.role}">${u.name[0].toUpperCase()}</div>

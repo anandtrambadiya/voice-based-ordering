@@ -84,7 +84,7 @@ def place_order(order_id):
     order.status = 'placed'
     _recalculate(order)
     db.session.commit()
-    return jsonify(order.to_dict())
+    return jsonify(order.to_dict())  # to_dict now includes short_id via relationship
 
 
 @orders_bp.route('/api/orders', methods=['GET'])

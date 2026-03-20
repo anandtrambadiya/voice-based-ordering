@@ -5,7 +5,7 @@ from utils.auth import login_required, owner_required, staff_required
 menu_bp = Blueprint('menu', __name__)
 
 
-@menu_bp.route('/')
+@menu_bp.route('/dashboard')
 @owner_required
 def dashboard():
     return render_template('dashboard.html')
