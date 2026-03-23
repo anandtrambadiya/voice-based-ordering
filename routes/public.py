@@ -3,9 +3,7 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from models import db, Registration, Restaurant, User, generate_password
 from utils.auth import admin_required
 from datetime import datetime
-import hashlib, secrets, string, smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import hashlib, secrets, string
 
 public_bp = Blueprint('public', __name__)
 
@@ -204,19 +202,19 @@ GMAIL_USER = 'anandcoc67@gmail.com'
 GMAIL_APP_PASSWORD = "gcxw dnfi elrw tshj"
 
 def send_email(to_email, subject, body):
-    """Send email via Gmail SMTP. Returns (True, None) or (False, error_msg)."""
+    """Send email via Resend API. Returns (True, None) or (False, error_msg)."""
+    api_key = "re_CbBXowTf_8xfza7NZFVNVJ7wiHEwYFX6M"
+    if not api_key:
+        return False, 'RESEND_API_KEY not set'
     try:
-        msg = MIMEMultipart()
-        msg['From']    = f'VoiceBill <{GMAIL_USER}>'
-        msg['To']      = to_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-
-        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_USER, to_email, msg.as_string())
+        import resend
+        resend.api_key = api_key
+        resend.Emails.send({
+            'from':    'VoiceBill <onboarding@resend.dev>',
+            'to':      [to_email],
+            'subject': subject,
+            'text':    body,
+        })
         return True, None
     except Exception as e:
         return False, str(e)
