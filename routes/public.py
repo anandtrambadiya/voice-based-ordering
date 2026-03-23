@@ -203,7 +203,7 @@ GMAIL_APP_PASSWORD = "gcxw dnfi elrw tshj"
 
 def send_email(to_email, subject, body):
     """Send email via Resend API. Returns (True, None) or (False, error_msg)."""
-    api_key = "re_CbBXowTf_8xfza7NZFVNVJ7wiHEwYFX6M"
+    api_key = os.environ.get('BREVO_API_KEY', '')
     if not api_key:
         return False, 'RESEND_API_KEY not set'
     try:
