@@ -6,7 +6,8 @@
 {% if is_customer %}
 <style>
 nav { display: none !important; }
-.app-wrap { height: 100vh !important; }
+.app-wrap { height: auto !important; }
+body { overflow: auto !important; }
 .cust-header{background:#fff;border-bottom:1.5px solid var(--bdr);padding:.65rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .cust-left{display:flex;align-items:center;gap:10px;}
 .cust-icon{width:34px;height:34px;background:var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 2px 8px rgba(14,165,160,.25);}
@@ -360,6 +361,7 @@ async function init() {
   const menuUrl = CTOKEN ? `/api/customer/menu?r=${CTOKEN}` : '/api/menu';
   const res = await fetch(menuUrl);
   MENU = await res.json();
+  buildAliasIndex();   // Build alias index from menu names + nicknames
   buildCatTabs();
   renderMenu();
   buildChips();
@@ -697,8 +699,11 @@ const NUMS = {
   'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,
   'ek':1,'do':2,'teen':3,'char':4,'paanch':5,'chhe':6,'saat':7,'aath':8,'nau':9,'das':10,
 };
-const SKIP = new Set(['please','and','aur','also','plus','with','some','give','me','i','would',
-  'like','can','get','the','want','order']);
+const SKIP = new Set([
+  'please','and','aur','also','plus','with','give','me','i','would',
+  'like','can','the','want','a','an','or','do','ka','ki','ke',
+  'bhi','ek','ok','hi','na','si'
+]);
 
 function parseAndAdd(transcript) {
   const words = transcript.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w => w && !SKIP.has(w));
@@ -747,45 +752,70 @@ function matchAhead(words, start) {
   return { item: null, span: 0 };
 }
 
-function findItem(chunk) {
-  // 1. Exact full name match
-  let m = MENU.find(i => i.name.toLowerCase() === chunk);
-  if (m) return m;
+// ── ALIAS INDEX ───────────────────────────────────────────────
+// Built once after MENU loads. Maps alias string → MenuItem.
+// Alias sources: full name, each word (≥3 chars), nicknames from DB.
+let ALIAS_INDEX = []; // [{alias, item, priority}] sorted by priority
 
-  // 2. Chunk contains the full item name (e.g. "garlic naan please" contains "garlic naan")
-  m = MENU.find(i => chunk.includes(i.name.toLowerCase()));
-  if (m) return m;
+function buildAliasIndex() {
+  ALIAS_INDEX = [];
+  const add = (alias, item, priority) => {
+    if (!alias || alias.length < 2) return;
+    ALIAS_INDEX.push({ alias: alias.toLowerCase().trim(), item, priority });
+  };
 
-  // 3. Item name contains chunk exactly (min 5 chars to avoid false matches)
-  if (chunk.length >= 5) {
-    m = MENU.find(i => i.name.toLowerCase().includes(chunk));
-    if (m) return m;
-  }
+  MENU.forEach(item => {
+    const name = item.name.toLowerCase();
 
-  // 4. Multi-word items: ALL words of item name appear EXACTLY in chunk words
-  // (no prefix — "butter" must match "butter", not "better" or "butt")
-  const cWords = chunk.split(' ');
-  m = MENU.find(i => {
-    const nWords = i.name.toLowerCase().split(' ');
-    return nWords.length > 1 && nWords.every(nw => cWords.includes(nw));
+    // Priority 1: full exact name  e.g. "butter chicken"
+    add(name, item, 1);
+
+    // Priority 2: nicknames from DB  e.g. "murgh", "makhani"
+    if (item.nicknames) {
+      item.nicknames.split(',').forEach(n => add(n.trim(), item, 2));
+    }
+
+    // Priority 3: multi-word item — all individual words  e.g. "butter", "chicken"
+    const words = name.split(' ');
+    if (words.length > 1) {
+      words.forEach(w => { if (w.length >= 3) add(w, item, 3); });
+    }
+
+    // Priority 4: single-word items or any word ≥4 chars
+    words.forEach(w => { if (w.length >= 4) add(w, item, 4); });
   });
-  if (m) return m;
 
-  // 5. Single-word items: chunk word must be >= 5 chars AND match item word exactly
-  // (no startsWith — prevents "better"→"butter", "milk"→"mango lassi")
-  for (const cw of cWords) {
-    if (cw.length < 5) continue;
-    m = MENU.find(i => i.name.toLowerCase().split(' ').some(nw => nw === cw));
-    if (m) return m;
+  // Sort by priority asc (lower = higher priority), then alias length desc (longer = more specific)
+  ALIAS_INDEX.sort((a, b) => a.priority - b.priority || b.alias.length - a.alias.length);
+}
+
+function findItem(chunk) {
+  if (!chunk) return null;
+  const c = chunk.toLowerCase().trim();
+
+  // Pass 1: exact alias match (highest to lowest priority)
+  for (const { alias, item } of ALIAS_INDEX) {
+    if (alias === c) return item;
   }
 
-  // 6. Last resort: Levenshtein-style edit distance for typos (max 1 char difference)
+  // Pass 2: chunk contains a known alias (e.g. "garlic naan please" → "garlic naan")
+  for (const { alias, item } of ALIAS_INDEX) {
+    if (alias.length >= 3 && c.includes(alias)) return item;
+  }
+
+  // Pass 3: alias is contained in chunk — handles partial speech
+  for (const { alias, item } of ALIAS_INDEX) {
+    if (alias.length >= 4 && c.length >= 4 && alias.includes(c)) return item;
+  }
+
+  // Pass 4: edit distance ≤1 on each word (typo/accent tolerance)
+  const cWords = c.split(' ');
   for (const cw of cWords) {
-    if (cw.length < 5) continue;
-    m = MENU.find(i => i.name.toLowerCase().split(' ').some(nw =>
-      nw.length >= 5 && editDistance(nw, cw) <= 1
-    ));
-    if (m) return m;
+    if (cw.length < 4) continue;
+    for (const { alias, item } of ALIAS_INDEX) {
+      const aWords = alias.split(' ');
+      if (aWords.some(aw => aw.length >= 4 && editDistance(aw, cw) <= 1)) return item;
+    }
   }
 
   return null;
