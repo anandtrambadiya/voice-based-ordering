@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, jsonify, session, redirect
 from models import db, Registration, Restaurant, User, generate_password
 from utils.auth import admin_required
@@ -200,7 +201,7 @@ def admin_stats():
 # ── EMAIL SENDER ─────────────────────────────────────────────
 
 GMAIL_USER = 'anandcoc67@gmail.com'
-GMAIL_APP_PASSWORD = 'gcxw dnfi elrw tshj'  # Replace this
+GMAIL_APP_PASSWORD = "gcxw dnfi elrw tshj"
 
 def send_email(to_email, subject, body):
     """Send email via Gmail SMTP. Returns (True, None) or (False, error_msg)."""
@@ -211,7 +212,9 @@ def send_email(to_email, subject, body):
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_USER, to_email, msg.as_string())
         return True, None
