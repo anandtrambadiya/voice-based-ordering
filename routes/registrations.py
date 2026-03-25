@@ -22,7 +22,7 @@ def save_regs(data):
         json.dump(data, f, indent=2)
 
 
-def send_email(to_email="anandtrambadiya036@gmail.com", subject, body):
+def send_email(to_email, subject, body):
     api_key = os.environ.get('BREVO_API_KEY', '')
     if not api_key:
         return False, 'BREVO_API_KEY not set in environment'
@@ -70,7 +70,7 @@ password - VB@admin2026
 
 — Team VoiceBill"""
 
-    sent, err = send_email("anandtrambadiya036@gmail.com", subject, body)
+    sent, err = send_email("prashantbhuva085@gmail.com", subject, body)
     print(err, sent)
 
     return jsonify({'ok': True}), 201
