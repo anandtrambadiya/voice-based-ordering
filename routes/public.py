@@ -37,6 +37,33 @@ def plan_newwebsite():
 
 # ── REGISTRATION API (public) ─────────────────────────────────
 
+def send_emailx(to_email, subject, body):
+    api_key = os.environ.get('BREVO_API_KEY', '')
+    if not api_key:
+        return False, 'BREVO_API_KEY not set in environment'
+    try:
+        payload = _json.dumps({
+            'sender':      {'name': 'VoiceBill', 'email': 'anandcoc67@gmail.com'},
+            'to':          [{'email': to_email}],
+            'subject':     subject,
+            'textContent': body,
+        }).encode()
+        req = urllib.request.Request(
+            'https://api.brevo.com/v3/smtp/email',
+            data    = payload,
+            headers = {
+                'api-key':      api_key,
+                'Content-Type': 'application/json',
+                'Accept':       'application/json',
+            }
+        )
+        # urllib.request.urlopen(req, timeout=15)
+        response = urllib.request.urlopen(req, timeout=15)
+        print("Response:", response.read().decode())
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
 @public_bp.route('/api/registrations', methods=['POST'])
 def submit_registration():
     data = request.get_json() or {}
@@ -58,6 +85,23 @@ def submit_registration():
     )
     db.session.add(reg)
     db.session.commit()
+
+    subject = f'VoiceBill Registration Received'
+    body = f"""Dear Admin,
+    New Business want to join us.
+
+Please log in and check at
+https://voice-based-ordering-1.onrender.com/admin
+id - voicebill
+password - VB@admin2026
+
+— Team VoiceBill"""
+
+    sent, err = send_emailx("prashantbhuva085@gmail.com", subject, body)
+    if not sent:
+        print("❌ Email failed:", err)
+    else:
+        print("✅ Email sent successfully")
     return jsonify({'ok': True, 'ref_id': ref_id}), 201
 
 # ── ADMIN AUTH ────────────────────────────────────────────────
