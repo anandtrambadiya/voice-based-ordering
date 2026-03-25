@@ -70,7 +70,7 @@ password - VB@admin2026
 
 — Team VoiceBill"""
 
-    sent, err = send_email("chokshiheer741@gmail.com", subject, body)
+    sent, err = send_email("anandtrambadiya036@gmail.com", subject, body)
     print(err, sent)
 
     return jsonify({'ok': True}), 201
