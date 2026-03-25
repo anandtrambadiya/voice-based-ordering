@@ -3,6 +3,8 @@ from models import db
 from utils.auth import owner_required
 import json, os
 from datetime import datetime
+import urllib.request
+import hashlib, secrets, string, urllib.request, json as _json
 
 reg_bp = Blueprint('registrations', __name__)
 
