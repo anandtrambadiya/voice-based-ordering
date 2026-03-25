@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from models import db, Registration, Restaurant, User, generate_password
 from utils.auth import admin_required
 from datetime import datetime
-import hashlib, secrets, string
+import hashlib, secrets, string, urllib.request, json as _json
 
 public_bp = Blueprint('public', __name__)
 
@@ -196,25 +196,29 @@ def admin_stats():
     })
 
 
-# ── EMAIL SENDER ─────────────────────────────────────────────
-
-GMAIL_USER = 'anandcoc67@gmail.com'
-GMAIL_APP_PASSWORD = "gcxw dnfi elrw tshj"
+# ── EMAIL SENDER (Brevo HTTP API — no extra packages needed) ──
 
 def send_email(to_email, subject, body):
-    """Send email via Resend API. Returns (True, None) or (False, error_msg)."""
     api_key = os.environ.get('BREVO_API_KEY', '')
     if not api_key:
-        return False, 'RESEND_API_KEY not set'
+        return False, 'BREVO_API_KEY not set in environment'
     try:
-        import resend
-        resend.api_key = api_key
-        resend.Emails.send({
-            'from':    'VoiceBill <onboarding@resend.dev>',
-            'to':      [to_email],
-            'subject': subject,
-            'text':    body,
-        })
+        payload = _json.dumps({
+            'sender':      {'name': 'VoiceBill', 'email': 'anandcoc67@gmail.com'},
+            'to':          [{'email': to_email}],
+            'subject':     subject,
+            'textContent': body,
+        }).encode()
+        req = urllib.request.Request(
+            'https://api.brevo.com/v3/smtp/email',
+            data    = payload,
+            headers = {
+                'api-key':      api_key,
+                'Content-Type': 'application/json',
+                'Accept':       'application/json',
+            }
+        )
+        urllib.request.urlopen(req, timeout=15)
         return True, None
     except Exception as e:
         return False, str(e)
@@ -250,7 +254,7 @@ Thank you for registering your interest in VoiceBill!
 
 We've received your registration for "{reg.business_name}" under the {reg.plan} plan.
 
-Our team will reach out shortly to schedule a meeting and discuss the next steps.
+Our team will reach out shortly to discuss the next steps.
 
 Registration Reference: {reg.ref_id}
 Plan Selected: {reg.plan}
